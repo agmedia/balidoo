@@ -11,6 +11,7 @@
 /upload/image/*
 !/upload/image/cache/index.html
 
+
 # Backup Files
 /upload/system/storage/backup/*
 !/upload/system/storage/backup/index.html
