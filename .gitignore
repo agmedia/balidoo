@@ -9,8 +9,6 @@
 # Image Cache Files
 /upload/image/cache/*
 /upload/image/*
-
-/upload/image/cache/*
 !/upload/image/cache/index.html
 
 # Backup Files
