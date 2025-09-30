@@ -1,0 +1,17 @@
+# Cache i logs
+system/storage/cache/
+system/storage/logs/
+image/cache/
+image/catalog/demo/
+
+# Config fajlovi (lokalni, osjetljivi)
+config.php
+admin/config.php
+
+# Backup dumpovi baze
+*.sql
+*.zip
+
+# PhpStorm i IDE fajlovi
+.idea/
+*.iml
