@@ -1,0 +1,81 @@
+{{ header }}{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right">
+				<a href="{{ support_email }}" data-toggle="tooltip" title="{{ text_need_support }}" class="btn btn-info"><i class="fa fa-support"></i> {{ text_need_support }}</a>
+				<button type="submit" form="form-seo_structured_data" data-toggle="tooltip" title="{{ button_save_and_stay }}" class="btn btn-primary" onClick="$('#save_and_stay').val(1);"><i class="fa fa-save"></i> {{ button_save_and_stay }}</button>
+				<button type="submit" form="form-seo_structured_data" data-toggle="tooltip" title="{{ button_save_and_exit }}" class="btn btn-primary" onClick="$('#save_and_stay').val(0);"><i class="fa fa-save"></i> {{ button_save_and_exit }}</button>
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i> {{ button_cancel }}</a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+				<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+		<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+		{% endif %}
+		{% if success %}
+		<div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+		{% endif %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+			</div>
+			<div class="panel-body">
+				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-seo_structured_data" class="form-horizontal">
+					<input type="hidden" name="save_and_stay" id="save_and_stay" />
+					<div class="form-group">
+						<label class="col-sm-3 control-label">{{ entry_status }}</label>
+						<div class="col-sm-6">
+							<select name="module_seo_structured_data_status" class="form-control">
+								{% if module_seo_structured_data_status %}
+								<option value="1" selected="selected">{{ text_enabled }}</option>
+								<option value="0">{{ text_disabled }}</option>
+								{% else %}
+								<option value="1">{{ text_enabled }}</option>
+								<option value="0" selected="selected">{{ text_disabled }}</option>
+								{% endif %}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">{{ entry_fb_app_id }}</label>
+						<div class="col-sm-6">
+							<input type="text" name="module_seo_structured_data_fb_app_id" class="form-control" placeholder="{{ entry_fb_app_id }}" value="{{ module_seo_structured_data_fb_app_id }}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">{{ entry_twitter_creator }}</label>
+						<div class="input-group col-sm-6">
+							<span class="input-group-addon" id="basic-addon1">@</span>
+							<input type="text" name="module_seo_structured_data_twitter_creator" class="form-control" placeholder="{{ entry_twitter_creator }}" value="{{ module_seo_structured_data_twitter_creator }}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">{{ entry_width }}</label>
+						<div class="col-sm-6">
+							<input type="number" name="module_seo_structured_data_width" class="form-control" placeholder="{{ entry_width }}" value="{{ module_seo_structured_data_width }}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">{{ entry_height }}</label>
+						<div class="col-sm-6">
+							<input type="number" name="module_seo_structured_data_height" class="form-control" placeholder="{{ entry_height }}" value="{{ module_seo_structured_data_height }}">
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{{ footer }}

@@ -1,0 +1,276 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+		{% if not uprade_needed %}
+			<button type="submit" form="form-atpresets" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+		{% endif %}
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+	  <ul class="breadcrumb">
+		{% for breadcrumb in breadcrumbs %}
+		<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+	  </ul>
+    </div>
+  </div>
+  <div class="container-fluid">  
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+		<div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+    </div>
+    {% endif %}	
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_title }}</h3>
+      </div>
+      <div class="panel-body">
+	  {% if not uprade_needed %}
+      <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-atpresets" class="form-horizontal">
+	
+		  <fieldset>	
+		  <div class="form-group">.
+			<input type="hidden" name="module_atpresets_status" value="1" />
+			<input type="hidden" name="module_atpresets_installed" value="1" />
+			<label class="col-sm-2 control-label">{{ entry_delete }}</label>
+            <div class="col-sm-10">
+                  <label class="radio-inline">
+                    {% if module_atpresets_delete %}
+                    <input type="radio" name="module_atpresets_delete" value="1" checked="checked" />
+                    {{ text_yes }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_delete" value="1" />
+                    {{ text_yes }}
+                    {% endif %}
+                  </label>
+                  <label class="radio-inline">
+                    {% if not module_atpresets_delete %}
+                    <input type="radio" name="module_atpresets_delete" value="0" checked="checked" />
+                    {{ text_no }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_delete" value="0" />
+                    {{ text_no }}
+                    {% endif %}
+                  </label>			
+            </div>
+          </div>		
+		  <div class="form-group">
+			<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_autoupdate }}">{{ entry_autoupdate }}</span></label>
+            <div class="col-sm-10">
+                  <label class="radio-inline">
+                    {% if module_atpresets_autoupdate %}
+                    <input type="radio" name="module_atpresets_autoupdate" value="1" checked="checked" />
+                    {{ text_yes }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_autoupdate" value="1" />
+                    {{ text_yes }}
+                    {% endif %}
+                  </label>
+                  <label class="radio-inline">
+                    {% if not module_atpresets_autoupdate %}
+                    <input type="radio" name="module_atpresets_autoupdate" value="0" checked="checked" />
+                    {{ text_no }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_autoupdate" value="0" />
+                    {{ text_no }}
+                    {% endif %}
+                  </label>			
+            </div>
+          </div>
+		  <div class="form-group">
+			<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_allow_multiple }}">{{ entry_allow_multiple }}</span></label>
+            <div class="col-sm-10">
+                  <label class="radio-inline">
+                    {% if module_atpresets_allow_multiple %}
+                    <input type="radio" name="module_atpresets_allow_multiple" value="1" checked="checked" />
+                    {{ text_yes }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_allow_multiple" value="1" />
+                    {{ text_yes }}
+                    {% endif %}
+                  </label>
+                  <label class="radio-inline">
+                    {% if not module_atpresets_allow_multiple %}
+                    <input type="radio" name="module_atpresets_allow_multiple" value="0" checked="checked" />
+                    {{ text_no }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_allow_multiple" value="0" />
+                    {{ text_no }}
+                    {% endif %}
+                  </label>			
+            </div>
+          </div>			  
+		  <div class="form-group">
+			<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_selecttype }}">{{ entry_selecttype }}</span></label>
+            <div class="col-sm-10">
+                  <label class="radio-inline">
+                    {% if module_atpresets_selecttype %}
+                    <input type="radio" name="module_atpresets_selecttype" value="1" checked="checked" />
+                    {{ text_droplist }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_selecttype" value="1" />
+                    {{ text_droplist }}
+                    {% endif %}
+                  </label>
+                  <label class="radio-inline">
+                    {% if not module_atpresets_selecttype %}
+                    <input type="radio" name="module_atpresets_selecttype" value="0" checked="checked" />
+                    {{ text_autocomplete }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_selecttype" value="0" />
+                    {{ text_autocomplete }}
+                    {% endif %}
+                  </label>			
+            </div>
+          </div>
+<script type="text/javascript"><!--
+$('input[name="module_atpresets_allow_multiple"]').change(function(){
+	if ($('input[name="module_atpresets_allow_multiple"]:checked').val()==1) {
+		$('input[name="module_atpresets_selecttype"][value="1"]').prop('checked',true);
+	}
+});
+$('input[name="module_atpresets_selecttype"]').change(function(){
+	if ($('input[name="module_atpresets_selecttype"]:checked').val()==0) {
+		$('input[name="module_atpresets_allow_multiple"][value="0"]').prop('checked',true);
+	}
+});
+//--></script> 		  
+		  <div class="form-group">
+			<label class="col-sm-2 control-label">{{ entry_use_newline }}</label>
+            <div class="col-sm-10">
+                  <label class="radio-inline">
+                    {% if module_atpresets_use_newline %}
+                    <input type="radio" name="module_atpresets_use_newline" value="1" checked="checked" />
+                    {{ text_newline }}
+                    {% else %}
+                    <input type="radio" name="module_atpresets_use_newline" value="1" />
+                    {{ text_newline }}
+                    {% endif %}
+                  </label>
+                  <label class="radio-inline">
+                    {% if not module_atpresets_use_newline %}
+                    <input type="radio" name="module_atpresets_use_newline" value="0" checked="checked" />
+                    {{ text_other }} <input type="text" name="module_atpresets_other_character" value="{{ module_atpresets_other_character }}"/>
+                    {% else %}
+                    <input type="radio" name="module_atpresets_use_newline" value="0" />
+                    {{ text_other }} <input type="text" name="module_atpresets_other_character" value="{{ module_atpresets_other_character }}"/>
+                    {% endif %}
+                  </label>	
+            </div>
+          </div>			  
+		  <div class="form-group">
+			<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_limit }}">{{ entry_limit }}</span></label>
+            <div class="col-sm-10">
+				<input type="text" name="module_atpresets_limit" value="{{ module_atpresets_limit }}" placeholder="{{ entry_limit }}" id="input-limit" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+			<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_get_attribute_values }}">{{ entry_get_attribute_values }}</span></label>
+            <div class="col-sm-10">
+				<button type="button" class="btn btn-default" onclick="getAttributes('index.php?route=extension/module/atpresets/get_attributes{{ "&user_token=" }}{{ user_token }}',false)" >{{ text_get_attributes }}</button> &nbsp;<span id="processmessage" style="text-align: left;"></span>	
+            </div>
+          </div>			  			  
+		</fieldset>	
+        </form>
+{% else %}
+		<fieldset>	
+          <div class="form-group">
+            <label class="col-sm-2 control-label"><span data-toggle="tooltip" title="{{ help_upgrade }}">{{ entry_upgrade }}</span></label>
+            <div class="col-sm-10">
+				<button type="button" class="btn btn-default" onclick="upgrade('index.php?route=extension/module/atpresets/upgrade{{ "&user_token=" }}{{ user_token }}',false)" >{{ text_upgrade }}</button> &nbsp;<span id="processmessage1" style="text-align: left;"></span>					
+            </div>
+          </div>				  
+		</fieldset>		
+{% endif %}		
+      </div>
+    </div>
+  </div>
+  
+<script type="text/javascript"><!--
+$(document).ajaxStop(function() {
+  $( "#processmessage" ).html( "&nbsp" );
+});
+
+function getAttributes(url, next){
+	if (!next)
+		x=window.confirm("{{ text_confirm_get_attributes}}");
+	else
+		x=true;
+	if (x){
+		$( "#processmessage" ).html( "<b>In progress...</b>" );
+		$.ajax({		
+			url : url,
+			dataType: 'json',	
+			success: function(json) { 
+				$('.alert, .text-danger').remove();
+
+				if (json['error']) {
+					if (json['error']['warning']) {
+						$('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + '</div>');
+					}
+				}
+
+				if (json['next']) {
+					if (json['success']) {
+						$( "#processmessage" ).html( "<b>In progress..."+ json['success']+"</b>" ); 
+
+						getAttributes(json['next'],true);
+					}
+				} else {
+					if (json['success']) {
+						$('#content > .container-fluid').prepend('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+					}
+				}	
+			}		
+		});
+	}
+}
+
+//--></script>  
+<script type="text/javascript"><!--
+$(document).ajaxStop(function() {
+  $( "#processmessage1" ).html( "&nbsp" );
+});
+
+function upgrade(url,next){
+	if (!next)
+		x=x=window.confirm("{{ text_confirm_upgrade }}");
+	else
+		x=true;
+	
+	if (x){
+		$( "#processmessage1" ).html( "<b>In progress...</b>" );
+		$.ajax({		
+			url : url,
+			dataType: 'json',	
+			success: function(json) { 
+				$('.alert, .text-danger').remove();
+
+				if (json['error']) {
+					if (json['error']['warning']) {
+						$('#content > .container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error']['warning'] + '</div>');
+					}
+				}
+
+				if (json['next']) {
+					if (json['success']) {
+						$( "#processmessage1" ).html( "<b>In progress..."+ json['success']+"</b>" ); 
+
+						upgrade(json['next'],true);
+					}
+				} else {
+					location.reload(); 
+				}	
+			}			
+		});
+	}
+}
+
+//--></script>   
+</div>
+{{ footer }}

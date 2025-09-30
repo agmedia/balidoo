@@ -1,0 +1,123 @@
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Module status:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Enable or disable the module.</span>
+      </div>
+      <div class="col-md-3">
+        <select id="Checker" name="{{ moduleName }}[Enabled]" class="form-control">
+              <option value="yes" {{ moduleData.Enabled  and  moduleData.Enabled  ==  'yes' ? 'selected=selected' : '' }}>{{ text_enabled }}</option>
+              <option value="no"  {{ moduleData.Enabled  and  moduleData.Enabled  ==  'no'  ? 'selected=selected' : '' }}>{{ text_disabled }}</option>
+        </select>
+      </div>
+    </div>
+    <br />
+
+    <div class="row">
+      <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Always show the gift page before checkout:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Show the gift page even if the user is not eligible for gift</span>
+      </div>
+      <div class="col-md-3">
+        <select id="Checker" name="{{ moduleName }}[BeforeCheckout]" class="form-control">
+              <option value="yes" {{ moduleData.BeforeCheckout  and  moduleData.BeforeCheckout ==  'yes' ? 'selected=selected' : '' }}>{{ text_enabled }}</option>
+              <option value="no"  {{ moduleData.BeforeCheckout  and  moduleData.BeforeCheckout ==  'no' ? 'selected=selected' : '' }}>{{ text_disabled }}</option>
+        </select>
+      </div>
+    </div>
+    <br />
+
+    <div class="row">
+      <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Main menu link:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Add a link to the main menu.</span>
+      </div>
+      <div class="col-md-3">
+        <select id="MenuLinkChecker" name="{{ moduleName }}[MainMenuLink]" class="form-control">
+              <option value="yes" {{ moduleData.MainMenuLink  and  moduleData.MainMenuLink ==  'yes' ? 'selected=selected' : '' }}>{{ text_enabled }}</option>
+              <option value="no"  {{ moduleData.MainMenuLink  and  moduleData.MainMenuLink ==  'no' ? 'selected=selected' : '' }}>{{ text_disabled }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="row menulink">
+    <br />
+      <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Main menu link sort order:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Set the main menu link sort order (set 0 for first position).</span>
+      </div>
+      <div class="col-md-3">
+          <input type="number" name="{{ moduleName }}[SortOrder]" value="{{ moduleData.SortOrder ? moduleData.SortOrder : '0' }}" min="0.00" step="1.00" data-number-to-fixed="2" data-number-stepfactor="100" class="form-control number" />
+      </div>
+    </div>
+
+    <div class="row menulink">
+       <br />
+       <div class="col-md-3">
+          <h5><strong>Main menu text:</strong></h5>
+          <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Set the main menu link text.</span>
+       </div>
+       <div class="col-md-3">
+          {% for language in languages %}
+            <div class="input-group">
+              <span class="input-group-addon"><img src="{{ language.flag_url }}" title="{{ language.name }}"></span>
+              <input type="text" class="form-control" name="{{ moduleName }}[MenuName][{{ language.language_id }}]" value="{{ moduleData.MenuName.language.language_id ? moduleData.MenuName.language.language_id : 'Free Gifts'  }}" />
+            </div>
+          {% endfor %}
+       </div>
+    </div>
+    <br />
+
+    <div class="row">
+      <div class="col-md-3">
+        <h5><strong>Tax settings:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Enable if you want the gift calculations to be displayed with applied Taxes.</span>
+      </div>
+      <div class="col-md-3">
+        <select name="{{ moduleName }}[TaxCalc]" class="form-control">
+              <option value="yes" {{ moduleData.TaxCalc  and  moduleData.TaxCalc  ==  'yes' ? 'selected=selected' :  '' }}>{{ text_enabled }}</option>
+              <option value="no"  {{ moduleData.TaxCalc  and  moduleData.TaxCalc  ==  'no'  ? 'selected=selected' :  '' }}>{{ text_disabled }}</option>
+        </select>
+      </div>
+    </div>
+    <br />
+
+    <div class="row">
+       <div class="col-md-3">
+          <h5><strong>SEO URL Slug:</strong></h5>
+          <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Type only the slug that you want to use for SEO URL (use dashes instead of spaces).</span>
+       </div>
+       <div class="col-md-3">
+            <input type="text" class="form-control" name="{{ moduleName }}[SEOURL]" value="{{ moduleData.SEOURL ? moduleData.SEOURL : 'tieredgifts-listing' }}" />
+       </div>
+    </div>
+    <br />
+
+    <div class="row">
+      <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Product image width:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Set the product image width.</span>
+      </div>
+      <div class="col-md-3">
+        <div class="input-group"> 
+          <input type="number" name="{{ moduleName }}[ImageWidth]" value="{{ moduleData.ImageWidth ? moduleData.ImageWidth : '150' }}" min="0.00" step="1.00" data-number-to-fixed="2" data-number-stepfactor="100" class="form-control number" />
+          <span class="input-group-addon">px</span>
+        </div>
+      </div>
+    </div>
+    <br />
+
+    <div class="row">
+      <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Product image height:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Set the product image height.</span>
+      </div>
+      <div class="col-md-3">
+        <div class="input-group"> 
+          <input type="number" name="{{ moduleName }}[ImageHeight]" value="{{ moduleData.ImageHeight ? moduleData.ImageHeight : '150' }}" min="0.00" step="1.00" data-number-to-fixed="2" data-number-stepfactor="100" class="form-control number" />
+          <span class="input-group-addon">px</span>
+        </div>
+      </div>
+    </div>
+
+</div>

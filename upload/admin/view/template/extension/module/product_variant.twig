@@ -1,0 +1,157 @@
+{#
+ * Advanced Product Variants
+ *
+ * @author    Nxtal <support@nxtal.com>
+ * @copyright Nxtal 2020
+ * @license   Commercial
+ * @version   1.0.0
+ *
+#}
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ heading_title }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+		  <ul class="nav nav-tabs" id="language">
+			{% set i = 0 %}
+			{% for language in languages %}
+			<li {% if i == 0 %} class="active"{% endif %}><a href="#language{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /> {{ language.name }}</a></li>
+			{% set i = i+1 %}
+			{% endfor %}
+		  </ul>
+		  <div class="tab-content">
+			{% set i = 0 %}
+			{% for language in languages %}
+			<div class="tab-pane{% if i == 0 %} active{% endif %}" id="language{{ language.language_id }}">
+			  <div class="form-group">		  
+				<label class="col-sm-2 control-label" for="input-variant_text{{ language.language_id }}">{{ entry_text }}</label>
+				<div class="col-sm-10">
+				  <input type="text" name="product_variant_setting[variant_text][{{ language.language_id }}]" value="{% if variant.variant_text[language.language_id] %}{{ variant.variant_text[language.language_id] }}{% endif %}" placeholder="{{ entry_text }}" id="input-variant_text{{ language.language_id }}" class="form-control" />             
+				</div>
+			  </div>			  
+			</div>
+			{% set i = i+1 %}
+			{% endfor %}
+		  </div>
+		  <div class="form-group">		  
+            <label class="col-sm-2 control-label" for="input-image_width">{{ entry_image_width }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="product_variant_setting[image_width]" value="{% if variant.image_width %}{{ variant.image_width}}{% endif %}" placeholder="{{ entry_image_width }}" id="input-image_width" class="form-control" size="3" />             
+            </div>
+          </div>
+		  <div class="form-group">		  
+            <label class="col-sm-2 control-label" for="input-image_height">{{ entry_image_height }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="product_variant_setting[image_height]" value="{% if variant.image_height %}{{ variant.image_height}}{% endif %}" placeholder="{{ entry_image_height }}" id="input-image_height" class="form-control" size="3" />             
+            </div>
+          </div>
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-type">{{ entry_variant_type }}</label>
+            <div class="col-sm-10">
+              <select name="product_variant_setting[type]" id="input-type" class="form-control" >
+				{% for type, label in option_variant_types %}
+					{% if variant.type == type %}
+					  <option value="{{ type }}" selected="selected">{{ label }}</option>
+					  {% else %}
+					  <option value="{{ type }}">{{ label }}</option>
+					{% endif %}
+				{% endfor %}
+                </select>
+            </div>
+          </div> 
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-catalog">{{ entry_catalog }}</label>
+            <div class="col-sm-10">
+              <select name="product_variant_setting[catalog]" id="input-catalog" class="form-control" >
+			    {% if variant.catalog == 2 %}                  
+				  <option value="0">{{ text_disabled }}</option>
+                  <option value="1">{{ text_text_variant }}</option>
+                  <option value="2" selected="selected">{{ text_swatch_variant }}</option>
+				  {% elseif variant.catalog == 1 %}                  
+				  <option value="0">{{ text_disabled }}</option>
+                  <option value="1" selected="selected">{{ text_text_variant }}</option>
+                  <option value="2">{{ text_swatch_variant }}</option>
+				  {% else %}
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+				  <option value="1">{{ text_text_variant }}</option>
+                  <option value="2">{{ text_swatch_variant }}</option>
+				  {% endif %}
+                </select>
+            </div>
+          </div> 
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-quantity">{{ entry_soldout }}</label>
+            <div class="col-sm-10">
+              <select name="product_variant_setting[quantity]" id="input-quantity" class="form-control" >
+			    {% if variant.quantity == 2 %}
+                  <option value="2" selected="selected">{{ text_active }}</option>
+                  <option value="1">{{ text_inactive }}</option>
+                  <option value="0">{{ text_hide }}</option>
+				  {% elseif variant.quantity == 1 %}
+                  <option value="2">{{ text_active }}</option>
+                  <option value="1" selected="selected">{{ text_inactive }}</option>
+				  <option value="0">{{ text_hide }}</option>
+				  {% else %}                  
+				  <option value="2">{{ text_active }}</option>
+                  <option value="1">{{ text_inactive }}</option>
+				  <option value="0" selected="selected">{{ text_hide }}</option>
+				  {% endif %}
+                </select>
+            </div>
+          </div> 
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-ajax">{{ entry_ajax }}</label>
+            <div class="col-sm-10">
+              <select name="product_variant_setting[ajax]" id="input-ajax"  class="form-control" >
+				{% if variant.ajax %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+				  {% endif %}
+              </select>
+            </div>
+          </div> 
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="product_variant_setting_status" id="input-status"  class="form-control" >
+				{% if variant_status %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+				  {% endif %}
+              </select>
+            </div>
+          </div> 
+        </form>
+      </div>
+    </div>
+  </div>
+ </div>
+ {{ footer }}

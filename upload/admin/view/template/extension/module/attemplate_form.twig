@@ -1,0 +1,431 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-attemplate" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs  %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<style>
+#page-wrap ul li img {
+	margin: 0px 3px 6px 3px;
+}
+</style>  
+
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ heading_title }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-attemplate" class="form-horizontal">
+			<input type="hidden" name="attemplate_id" value="{{ attemplate_id }}" />
+          <div class="tab-content">
+              <div class="form-group required">
+                <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="name" value="{{ name }}" placeholder="{{ text_name }}" id="input-name" class="form-control" />
+                  {% if error_name %}
+                  <div class="text-danger">{{ error_name }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+				  <select name="status" id="input-status" class="form-control">
+					{% if status %}
+					<option value="1" selected="selected">{{ text_enabled }}</option>
+					<option value="0">{{ text_disabled }}</option>
+					{% else %}
+					<option value="1">{{ text_enabled }}</option>
+					<option value="0" selected="selected">{{ text_disabled }}</option>
+					{% endif %}
+				  </select>
+                </div>
+              </div>
+  
+			  <fieldset>
+			  <legend>{{ entry_attributes }}</legend>
+              <div class="table-responsive">
+                <table id="attribute" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left">{{ entry_attribute }}</td>
+                      <td class="text-left">{{ entry_presets }}</td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% set attribute_row = 0 %}
+                    {% for attribute in attributes %}
+                    <tr id="attribute-row{{ attribute_row }}">
+                      <td class="text-left" style="width: 40%;"><input type="text" name="attributes[{{ attribute_row }}][name]" value="{{ attribute.name }}" placeholder="{{ entry_attribute }}" class="form-control" />
+                        <input type="hidden" name="attributes[{{ attribute_row }}][attribute_id]" value="{{ attribute.attribute_id }}" /></td>
+                      <td class="text-left">		
+						{% if atpresets_installed==1 %}
+							{% if atpresets_selecttype==0 %}
+								<br><div class="test"><input type="text" name="attributes[{{ attribute_row }}][preset]" value="{{ attribute.preset_esc }}" placeholder="{{ text_preset_value }}" class="form-control" />
+								<input type="hidden" name="attributes[{{ attribute_row }}][preset_id][]" value="{% if attribute.preset_id|length == 1 %}{{ attribute.preset_id }}{% endif %}" /></div>
+								
+							{% else %}
+								<br><div>
+									{% if atpresets_allow_multiple==1 %}
+									
+										<input type="checkbox" id="allow_multiple{{ attribute_row }}" name="attributes[{{ attribute_row }}][allow_multiple]"
+											{% if attribute.allow_multiple %}
+											checked="checked"
+											{% endif %}
+											onchange="changeSelectionMode({{ attribute_row }});"/>
+										<label for="allow_multiple{{ attribute_row }}">{{ text_allow_multiple }}</label>										
+									{% endif %}
+									<select {% if attribute.allow_multiple %}multiple style="height:200px"{% endif %} alt="{{ attribute_row }}" name="attributes[{{ attribute_row }}][preset_id][]" id="input-preset{{ attribute_row }}" class="form-control" onchange="select_preset(this);" onfocus="check_attribute(this);">								
+									<option value="-1"></option>								
+									{% set current_att=0 %}
+									{% for preset in all_presets %}									
+										{% if current_att != preset.attribute_id %}{% set current_att = preset.attribute_id %}
+										<option color="red" class="att{{ attribute_row }} att{{ attribute_row }}-{{ preset.attribute_id }}" value="0" disabled="disabled" style="color:red">{{ preset.attribute_name }}</option>
+										{% endif %}									
+										{% if preset.preset_id in attribute.preset_id %}
+										<option alt="{{ preset.attribute_id }}" class="pre{{ attribute_row }} pre{{ attribute_row }}-{{ preset.attribute_id }}" value="{{ preset.preset_id }}" selected="selected">{{ preset.text_esc }}</option>
+										{% else %}
+										<option alt="{{ preset.attribute_id }}" class="pre{{ attribute_row }} pre{{ attribute_row }}-{{ preset.attribute_id }}" value="{{ preset.preset_id }}">{{ preset.text_esc }}</option>
+										{% endif %}
+									{% endfor %}
+								  </select>
+								<script>
+
+					
+									$('.att{{ attribute_row }}').hide();
+									$('.pre{{ attribute_row }}').hide();
+									$('.pre{{ attribute_row }}-{{ attribute.attribute_id }}').show();
+								</script>
+								</div>							
+						{% endif %}	
+					  {% endif %}	
+					  </td>
+						<td class="text-left">
+							<button type="button" onclick="$('#attribute-row{{ attribute_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button><br>
+						</td>					  
+                    </tr>
+                    {% set attribute_row = attribute_row + 1 %}
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td class="text-left"><button type="button" onclick="addAttribute();" data-toggle="tooltip" title="{{ button_attribute_add }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>			  
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>  
+  <script type="text/javascript"><!--
+var attribute_row = {{ attribute_row }};
+
+function addAttribute() {
+    html  = '<tr id="attribute-row' + attribute_row + '">';
+	html += '  <td class="text-left" style="width: 20%;"><input type="text" name="attributes[' + attribute_row + '][name]" value="" placeholder="{{ entry_attribute }}" class="form-control" /><input type="hidden" name="attributes[' + attribute_row + '][attribute_id]" value="" /></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#attribute-row' + attribute_row + '\').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+
+    html += '</tr>';
+
+	$('#attribute tbody').append(html);
+
+	addPresetField(attribute_row);
+
+	attributeautocomplete(attribute_row);
+
+	attribute_row++;
+}
+
+function addPresetField(attribute_row) {
+
+	{% if atpresets_selecttype==0 %}
+		html  = '<td><input type="text" name="attributes[' + attribute_row + '][preset]" value="" placeholder="{{ text_preset_value }}" class="form-control" />';
+		html += '<input type="hidden" name="attributes[' + attribute_row + '][preset_id][]" value="" /></td>';
+	{% else %}
+		html = '<td>';
+		{% if (atpresets_allow_multiple==1) %}
+		
+		html += '	<input type="checkbox" id="allow_multiple' + attribute_row + '" name="attributes[' + attribute_row + '][allow_multiple]"';
+		html += '		onchange="changeSelectionMode('+attribute_row+')"/>';
+		html += '	<label for="allow_multiple' + attribute_row + '">{{ text_allow_multiple }}</label>'; 
+			
+		{% endif %}	
+		html += '<br><select alt="' + attribute_row + '" name="attributes[' + attribute_row + '][preset_id][]" id="input-preset' + attribute_row + '" class="form-control" onchange="select_preset(this);"  onfocus="check_attribute(this);">';
+		html += '<option value="-1"></option>';
+			{% set current_att=0 %}
+			{% for preset in all_presets %}
+				
+				{% if current_att != preset.attribute_id %}{% set current_att = preset.attribute_id %}
+				html += '<option class="att' + attribute_row + ' att' + attribute_row + '-{{ preset.attribute_id }}" value="0" disabled="disabled" style="color:red">{{ preset.attribute_name_esc }}</option>';
+				{% endif %}
+				html += '<option alt="{{ preset.attribute_id }}" class="pre' + attribute_row + ' pre' + attribute_row + '-{{ preset.attribute_id }}" value="{{ preset.preset_id }}">{{ preset.text_esc2 }}</option>';
+			{% endfor %}
+		html  += '  </select></td>';
+								
+	{% endif %}	
+	$('input[name=\'attributes[' + attribute_row + '][name]\']').parent().after(html);
+
+	{% if atpresets_allow_multiple==1 %}	
+		addMultiSelectFunctionality(attribute_row);
+	{% endif %}
+
+	{% if atpresets_selecttype==0 %}
+		presetautocomplete(attribute_row);
+	{% endif %}
+}
+
+{% if atpresets_selecttype==0 %}
+function presetautocomplete(attribute_row) {
+
+	var attribute_id = $('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val();
+	$('#attribute-row'+attribute_row+' .test ul').remove();
+	if (attribute_id != '') {
+		$('input[name=\'attributes[' + attribute_row + '][preset]\']').autocomplete({
+			'source': function(request, response) {
+				$.ajax({
+					url: 'index.php?route=extension/module/atpresets/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request) + '&attribute_id=' + attribute_id,
+					dataType: 'json',			
+					success: function(json) {
+						response($.map(json, function(item) {
+							return {
+								label: item.not_decoded_text,
+								label_decoded: item.text,								
+								values: item.texts,
+								value: item.preset_id	
+							}
+						}));
+					}
+				});
+			},
+			'select': function(item) {
+				$('input[name=\'attributes[' + attribute_row + '][preset]\']').val(item['label_decoded']);
+				$('input[name=\'attributes[' + attribute_row + '][preset_id][]\']').val(item['value']);
+			}
+		});
+	
+	} else {
+		$('input[name=\'attributes[' + attribute_row + '][preset]\']').autocomplete({
+			'source': function(request, response) {
+				$.ajax({
+					url: 'index.php?route=extension/module/atpresets/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request) + '&attribute_id=' + attribute_id,
+					dataType: 'json',			
+					success: function(json) {
+						response($.map(json, function(item) {
+							return {
+								category: item.attribute_name,
+								attribute_id: item.attribute_id,
+								label: item.not_decoded_text,
+								label_decoded: item.text,
+								values: item.texts,
+								value: item.preset_id					
+							}
+						}));
+					}
+				});
+			},
+			select: function(item) {
+				
+				$('input[name=\'attributes[' + attribute_row + '][preset]\']').val(item['label_decoded']);
+				$('input[name=\'attributes[' + attribute_row + '][preset_id][]\']').val(item['value']);
+				$('input[name=\'attributes[' + attribute_row + '][name]\']').val(item['category']);
+				$('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val(item['attribute_id']);				
+
+				presetautocomplete(attribute_row);
+			}
+		});	
+	}
+}
+
+$('#attribute tbody tr').each(function(index, element) {
+	presetautocomplete(index);
+});
+{% else %}
+function select_preset(select_node) {
+	var att_row = $(select_node).attr('alt');
+	var preset_id = $(select_node).find(":selected").val();
+	var attribute_id = $(select_node).find(":selected").attr('alt');
+	
+	$.ajax({
+		url: 'index.php?route=extension/module/atpresets/getPresetTexts&user_token={{ user_token }}&preset_id=' + preset_id,
+		dataType: 'json',			
+		success: function(json) {
+			$('input[name=\'attributes[' + att_row + '][name]\']').val($('.att' + att_row + '-' + attribute_id).text());
+			$('input[name=\'attributes[' + att_row + '][attribute_id]\']').val(attribute_id);	
+				
+			if (preset_id != -1) {
+				$('.att' + att_row).hide();
+				$('.pre' + att_row).hide();
+				$('.pre' + att_row + '-' + attribute_id).show();			
+			} else {
+				$('.att' + att_row).show();
+				$('.pre' + att_row).show();			
+			}
+				
+		}
+	});	
+
+}
+
+function check_attribute(select_node) {
+	var att_row = $(select_node).attr('alt');
+	var att_text = $('input[name=\'attributes[' + att_row + '][name]\']').val();
+	
+	if (att_text=='') {
+		$('.att' + att_row).show();
+		$('.pre' + att_row).show();	
+		$('input[name=\'attributes[' + att_row + '][attribute_id]\']').val('');
+		$('select[name=\'attributes[' + att_row + '][preset_id][]\']').val(-1);
+	}
+}
+
+function changeSelectionMode(attribute_row) {
+	if (!$('#allow_multiple' + attribute_row ).is(':checked')) {
+		$('#input-preset' + attribute_row).css('height','auto');
+		$('#input-preset' + attribute_row).removeAttr('multiple'); 
+		$('#attribute-row'+attribute_row+' textarea').attr('readonly', false);		
+		
+		var ids = '';
+		$('#input-preset' + attribute_row + ' option').each(function(index) {
+			if ($(this).prop('selected')) {
+				ids += '_'+$(this).val();		
+			}
+			if ($(this).val() == -1) {
+				$(this).prop('selected', false);		
+			}			
+		});		
+	} else  {
+		$('#input-preset' + attribute_row).attr('multiple','multiple');
+		$('#input-preset' + attribute_row).css('height','200px');
+		$('#attribute-row'+attribute_row+' textarea').attr('readonly', true);		
+	}
+}
+
+function addMultiSelectFunctionality(attribute_row) {
+$('#input-preset' + attribute_row + ' option').unbind( "mousedown");
+$('#input-preset' + attribute_row + ' option').mousedown(function(e) {
+if ($('input[name="attributes[' + attribute_row + '][allow_multiple]"]').is(':checked')) {
+    e.preventDefault();
+	if ($(this).val() != -1) {
+		$(this).prop('selected', !$(this).prop('selected'));
+
+		if ($(this).prop('selected')) {
+			var attribute_id = $(this).attr('alt');
+			if ($('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val() != attribute_id) {
+				$('input[name=\'attributes[' + attribute_row + '][name]\']').val($('.att' + attribute_row + '-' + attribute_id).text());
+				$('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val(attribute_id);	
+				$('.att' + attribute_row).hide();
+				$('.pre' + attribute_row).hide();
+				$('.pre' + attribute_row + '-' + attribute_id).show();					
+			}
+		}
+		
+		var ids = '';
+		$('#input-preset' + attribute_row + ' option').each(function(index) {
+			if ($(this).prop('selected')) {
+				ids += '_'+$(this).val();		
+			}
+		});
+			
+	} else {
+		$(this).prop('selected', false);
+	}
+}
+	return false;
+});	
+}
+
+{% for i in 0..(attribute_row-1) %}
+addMultiSelectFunctionality({{ i }});
+if ($('#allow_multiple{{ i }}').attr("checked"))
+	$('#attribute-row{{ i }} textarea').attr('readonly', true);
+{% endfor %}
+{% endif %}
+function attributeautocomplete(attribute_row) {
+	$('input[name=\'attributes[' + attribute_row + '][name]\']').autocomplete({
+		'source': function(request, response) {
+			$.ajax({
+				url: 'index.php?route=catalog/attribute/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+				dataType: 'json',
+				success: function(json) {
+
+				{% if (atpresets_installed==1)  %}
+					{% if (atpresets_selecttype==0) %}
+						if (encodeURIComponent(request)=='') {
+							$('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val('');
+							$('input[name=\'attributes[' + attribute_row + '][preset]\']').unbind("blur");
+							$('input[name=\'attributes[' + attribute_row + '][preset]\']').unbind("focus");
+							$('input[name=\'attributes[' + attribute_row + '][preset]\']').unbind("keydown");					
+							$('input[name=\'attributes[' + attribute_row + '][preset]\']').val('');
+							$('input[name=\'attributes[' + attribute_row + '][preset_id][]\']').val(0);			
+							presetautocomplete(attribute_row);							
+						}
+					{% else %}
+						if (encodeURIComponent(request)=='') {
+							$('.att' + attribute_row).show();
+							$('.pre' + attribute_row).show();
+							$('select[name=\'attributes[' + attribute_row + '][preset_id][]\']').val(-1);							
+						}						
+					{% endif %}
+				{% endif %}
+			
+					response($.map(json, function(item) {
+						return {
+							category: item.attribute_group,
+							label: item.name,
+							value: item.attribute_id
+						}
+					}));
+				}
+			});
+		},
+		'select': function(item) {
+			$('input[name=\'attributes[' + attribute_row + '][name]\']').val(item['label']);
+						
+			if (item['value'] != $('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val()) {				
+				$('input[name=\'attributes[' + attribute_row + '][attribute_id]\']').val(item['value']);			
+				{% if (atpresets_installed==1) %}
+					{% if (atpresets_selecttype==0) %}
+						$('input[name=\'attributes[' + attribute_row + '][preset]\']').unbind("blur");
+						$('input[name=\'attributes[' + attribute_row + '][preset]\']').unbind("focus");
+						$('input[name=\'attributes[' + attribute_row + '][preset]\']').unbind("keydown");					
+						$('input[name=\'attributes[' + attribute_row + '][preset]\']').val('');
+						$('input[name=\'attributes[' + attribute_row + '][preset_id]\']').val(0);			
+						presetautocomplete(attribute_row);
+					{% else %}
+						$('.att' + attribute_row).hide();
+						$('.pre' + attribute_row).hide();
+						$('.pre' + attribute_row + '-' + item['value']).show();	
+						$('select[name=\'attributes[' + attribute_row + '][preset_id][]\']').val(-1);						
+					{% endif %}
+				{% endif %}
+			}
+			
+		}
+	});
+}
+
+$('#attribute tbody tr').each(function(index, element) {
+	attributeautocomplete(index);
+});
+//--></script>  
+{{ footer }}

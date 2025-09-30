@@ -1,0 +1,23 @@
+<table class="table table-hover table-bordered">
+	<thead>
+		<tr style="background-color:#007fda; color:#FFFFFF;">
+			<td class="col-sm-6">Filename</td>
+			<td class="text-center">Search Data</td>
+			<td class="text-center">Comment</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% if (finds) %} 
+		{% for template in templates %} 
+			<tr class="success"><th colspan="3">Template: {{ template }}</th></tr>
+			{% for find in finds[template] %} 
+			<tr>
+				<td style="word-break:break-all;"><strong>{{ find['filename'] }}</strong></td>
+				<td>{{ find['search_string'] }}</td>
+				<td class="text-center">{{ find['comment'] }}</td>
+			</tr>
+			{% endfor %} 
+		{% endfor %} 
+		{% endif %} 
+	</tbody>
+</table>

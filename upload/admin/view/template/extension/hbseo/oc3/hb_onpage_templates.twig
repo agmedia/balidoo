@@ -1,0 +1,25 @@
+<table class="table table-hover table-bordered">
+	<thead>
+		<tr class="info">
+			<td>{{ table_heading }} <a class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-template" title="Add Template" onclick="setfields('{{ page_type }}','{{ element_type }}','{{ language_id }}');"><i class="fa fa-plus-circle"></i> Add Template</a></td>
+			<td class="text-center col-sm-2">ACTION</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% if (templates) %} 
+		  {% for template in templates %} 
+			<tr>
+				<td>{{ template['template'] }}</td>
+				<td class="text-center">
+					<a class="btn btn-sm btn-primary" title="Preview Template" onclick="previewtemplate('{{ template['id'] }}');"><i class="fa fa-eye"></i></a>
+					<a class="btn btn-sm btn-danger" title="Delete Template" onclick="deletetemplate('{{ template['id'] }}','{{ block }}','{{ refreshlink }}');"><i class="fa fa-trash-o"></i></a>
+				</td>
+			</tr>
+		  {% endfor %} 
+		{% else %} 
+			<tr>
+				<td colspan="2" style="color:#FF0000;">No templates found. <a class="btn" data-toggle="modal" data-target="#add-template" onclick="setfields('{{ page_type }}','{{ element_type }}','{{ language_id }}');">Please Add Template</a></td>
+			</tr>
+		{% endif %} 
+	</tbody>
+</table>

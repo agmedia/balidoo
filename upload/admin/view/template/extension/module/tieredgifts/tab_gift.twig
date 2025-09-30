@@ -1,0 +1,107 @@
+<div id="giftcategory_{{ giftcategory.id }}" class="tab-pane giftcategory" style="width:99%;overflow:hidden;">
+  <div class="row">
+     <div class="col-md-3">
+        <h5><strong><span class="required">* </span>Gift Tier {{ giftcategory.id }} status:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Enable or disable the gifts tier categories.</span>
+     </div>
+     <div class="col-md-3">
+        <select id="Checker" name="{{ giftcategory_name }}[Enabled]" class="form-control">
+           <option value="yes" {{ giftcategory_data.Enabled and giftcategory_data.Enabled == 'yes' ? 'selected=selected' : ''}}>Enabled</option>
+           <option value="no"  {{ giftcategory_data.Enabled and giftcategory_data.Enabled == 'no' ? 'selected=selected' : ''}}>Disabled</option>
+        </select>
+     </div>
+  </div>
+  <br />
+
+  <div class="row">
+    <br />
+    <div class="col-md-3">
+      <h5><strong>Gift Tier {{ giftcategory.id }} name:</strong></h5>
+      <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Set the name of the template which will show up on the left column.</span>
+    </div>
+    <div class="col-md-3">
+      <input type="text" class="form-control" name="{{ giftcategory_name }}[Name]" value="{{ giftcategory_data.Name ? giftcategory_data.Name : 'Gift Tier '~giftcategory.id  }}" />
+    </div>
+  </div>
+
+  <br />
+  <div class="row">
+    <br />
+    <div class="col-md-3">
+      <h5><strong>Minimum cart value:</strong></h5>
+      <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Set minimum value of the shopping cart, which will be needed in order for the customer to be eligible for the gifts in this tier.</span>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group"> 
+            <span class="input-group-addon">{{ currency }}</span>
+            <input type="number" name="{{ giftcategory_name }}[CartValue]" value="{{ giftcategory_data.CartValue ? giftcategory_data.CartValue : '100.00' }}" min="0.00" step="1.00" data-number-to-fixed="2" data-number-stepfactor="100" class="form-control currency" />
+        </div> 
+    </div>
+  </div>
+
+  <br />
+  <div class="row">
+    <br />
+    <div class="col-md-3">
+      <h5><strong>Gifts in this tier:</strong></h5>
+      <span class="help"><i class="fa fa-info-circle"></i>&nbsp;Choose unique products to be part of this gift tier.</span>
+    </div>
+    <div class="col-md-3">
+      <input type="text" name="ProductsInGiftCategory" data-giftcategory-id="{{ giftcategory.id }}" value="" placeholder="Start typing..." id="input-productingiftcategory" class="form-control" autocomplete="off">
+      <div class="well well-sm product-gifts-category" style="height: 150px; overflow: auto;">
+        {% for product in giftcategory_data.GiftProducts %}
+          <div id="productgift_{{ product.product_id }}"><i class="fa fa-minus-circle"></i> {{ product.name }}
+            <input type="hidden" name="{{ giftcategory_name }}[GiftProducts][]" value="{{ product.product_id }}" />
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <br/>
+  <div class="row">
+    <br />
+    <div class="col-md-3">
+      <h5><strong>Eligible text:</strong></h5>
+      <span class="help"><i class="fa fa-info-circle"></i>&nbsp;When a customer is eligible for a gift this text will show above the gifts tier.</span>
+      <br /><br /><span class="help"><i class="fa fa-info-circle"></i>&nbsp;You can use the folowing codes:<br/> {category_value} - Minimum cart value</span>
+    </div>
+    <div class="col-md-3">
+      {% for language in languages %}
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-group-addon"><img src="{{ language.flag_url }}" title="{{ language.name }}"></span>
+          <input type="text" class="form-control" name="{{ giftcategory_name }}[Suitable][{{ language.language_id }}]" value="{{ giftcategory_data.Suitable[language.language_id] ? giftcategory_data.Suitable[language.language_id] : default_eligible  }}" />
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <br />
+  <div class="row">
+     <br />
+     <div class="col-md-3">
+        <h5><strong>NOT eligible text:</strong></h5>
+        <span class="help"><i class="fa fa-info-circle"></i>&nbsp;When a customer is NOT eligible for a gift this text will show above the gifts tier. <br /> P.S. This is a great way to tease customers to spend more.</span>
+        <br /><br /><span class="help"><i class="fa fa-info-circle"></i>&nbsp;You can use the folowing codes:<br/> {category_value} - Minimum cart value <br/> {spend_remaining} - The remaining for being suitable for this gift</span>
+     </div>
+     <div class="col-md-3">
+      {% for language in languages %}
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-group-addon"><img src="{{ language.flag_url }}" title="{{ language.name }}"></span>
+            <input type="text" class="form-control" name="{{ giftcategory_name }}[NotSuitable][{{ language.language_id }}]" value="{{ giftcategory_data.NotSuitable[language.language_id] ? giftcategory_data.NotSuitable[language.language_id] : default_not_eligible }}" />
+          </div>
+        </div>
+      {% endfor %}
+     </div>
+  </div>
+
+  <br />
+	{% if newAddition and newAddition == true %}
+		<script>
+      autocompleteProducts();
+    </script>
+	{% endif %}
+</div>

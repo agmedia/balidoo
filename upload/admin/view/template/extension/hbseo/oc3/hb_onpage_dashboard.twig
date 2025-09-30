@@ -1,0 +1,29 @@
+{% for page in pages %} 
+<table class="table table-hover table-bordered">
+	<thead>
+		<tr class="info">
+			<td class="col-sm-2">{{ page['title'] }}</td>
+			<td class="text-center">Total Items</td>
+			{% for language in languages %} 
+				<td class="text-center"><img src="language/{{ language['code'] }}/{{ language['code'] }}.png" title="{{ language['name'] }}" /> {{ language['name'] }}</td>
+			{% endfor %} 
+			<td class="text-center">Action</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for key,value in page['items'] %} 
+		<tr>
+			<td><strong>{{ value }}</strong></td>
+			<td class="text-center">{{ page['total_items'] }}</td>
+			{% for language in languages %} 
+				<td class="text-center {{ page['total_items'] == page['counts'][key][language['language_id']]?'success':'danger' }}">{{ page['counts'][key][language['language_id']] }}</td>
+			{% endfor %} 
+			<td class="text-center">
+				<a class="btn btn-sm btn-primary" onclick="generateElement('{{ page['code'] }}','{{ key }}');"><i class="fa fa-play-circle-o"></i> Generate</a>
+				<a class="btn btn-sm btn-danger" onclick="cleartags('{{ page['code'] }}','{{ key }}')" ><i class="fa fa-trash"></i> Clear</a>
+			</td>
+		</tr>
+		{% endfor %} 
+	</tbody>
+</table>
+{% endfor %}

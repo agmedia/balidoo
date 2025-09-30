@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>SEO - On-Page Tags Generator [default][3xxx]</name>
+    <version>{huntbee_vesion}</version>
+    <author>HuntBee OpenCart Services</author>
+    <link>https://www.huntbee.com</link>
+	<code>huntbee_onpage_tags_ocmod</code>
+
+	<!-- AUTO MODE-->
+	 <file path="admin/controller/catalog/product.php">
+        <operation>
+            <search><![CDATA[$this->response->setOutput($this->load->view('catalog/product_list]]></search>
+            <add position="before"><![CDATA[
+			$data['onpagetags'] = htmlspecialchars_decode(HTTPS_CATALOG.'index.php?route=extension/hbseo/onpage_tags_generator/generate_pages&page_type=product&authkey='.$this->config->get('hb_onpage_authkey'));
+			$data['hb_onpage_auto'] = $this->config->get('hb_onpage_auto');
+			if (isset($this->request->get['page'])) {
+				$data['pagination_detected'] = true;
+			}else{
+				$data['pagination_detected'] = false;
+			}
+			]]></add>
+        </operation>
+    </file>	
+     <file path="admin/controller/catalog/category.php">
+        <operation>
+            <search><![CDATA[$this->response->setOutput($this->load->view('catalog/category_list]]></search>
+            <add position="before"><![CDATA[
+			$data['onpagetags'] = htmlspecialchars_decode(HTTPS_CATALOG.'index.php?route=extension/hbseo/onpage_tags_generator/generate_pages&page_type=category&authkey='.$this->config->get('hb_onpage_authkey'));
+			$data['hb_onpage_auto'] = $this->config->get('hb_onpage_auto');
+			if (isset($this->request->get['page'])) {
+				$data['pagination_detected'] = true;
+			}else{
+				$data['pagination_detected'] = false;
+			}
+			]]></add>
+        </operation>
+    </file>
+    <file path="admin/controller/catalog/manufacturer.php">
+        <operation>
+            <search><![CDATA[$this->response->setOutput($this->load->view('catalog/manufacturer_list]]></search>
+            <add position="before"><![CDATA[
+			$data['onpagetags'] = htmlspecialchars_decode(HTTPS_CATALOG.'index.php?route=extension/hbseo/onpage_tags_generator/generate_pages&page_type=brand&authkey='.$this->config->get('hb_onpage_authkey'));
+			$data['hb_onpage_auto'] = $this->config->get('hb_onpage_auto');
+			if (isset($this->request->get['page'])) {
+				$data['pagination_detected'] = true;
+			}else{
+				$data['pagination_detected'] = false;
+			}
+			]]></add>
+        </operation>
+    </file>
+    <file path="admin/controller/catalog/information.php">
+        <operation>
+            <search><![CDATA[$this->response->setOutput($this->load->view('catalog/information_list]]></search>
+            <add position="before"><![CDATA[
+			$data['onpagetags'] = htmlspecialchars_decode(HTTPS_CATALOG.'index.php?route=extension/hbseo/onpage_tags_generator/generate_pages&page_type=information&authkey='.$this->config->get('hb_onpage_authkey'));
+			$data['hb_onpage_auto'] = $this->config->get('hb_onpage_auto');
+			if (isset($this->request->get['page'])) {
+				$data['pagination_detected'] = true;
+			}else{
+				$data['pagination_detected'] = false;
+			}
+			]]></add>
+        </operation>
+    </file>
+	
+	<file path="admin/view/template/catalog/{product_list,category_list,manufacturer_list,information_list}.twig">
+        <operation>
+            <search><![CDATA[{{ footer }}]]></search>
+            <add position="before"><![CDATA[
+			{% if ((hb_onpage_auto == 1) and (pagination_detected == false)) %}
+			<script type="text/javascript">
+			$(document).ready( function () {
+			  $.ajax({
+					  url: '{{ onpagetags }}'
+				 });
+			});
+			</script>
+			{% endif %}
+			]]>
+            </add>
+        </operation>
+    </file>
+    
+    <!--ADMIN CHANGES-->
+	<!--Product page form-->
+	<file path="admin/view/template/catalog/product_form.twig">
+        <operation error="log">
+            <search><![CDATA[<label class="col-sm-2 control-label" for="input-tag{{ language.language_id }}">]]>
+            </search>
+            <add position="before"><![CDATA[
+			    <label class="col-sm-2 control-label">{{ text_h1 }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="product_description[{{ language['language_id'] }}][h1]" value="{{ product_description[language['language_id']] is defined ? product_description[language['language_id']]['h1'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+		    <div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_h2 }}</label>
+                <div class="col-sm-10">
+                    <input type="text" name="product_description[{{ language['language_id'] }}][h2]" value="{{ product_description[language['language_id']] is defined ? product_description[language['language_id']]['h2'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_image_alt }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="product_description[{{ language['language_id'] }}][image_alt]" value="{{ product_description[language['language_id']] is defined ? product_description[language['language_id']]['image_alt'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_image_title }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="product_description[{{ language['language_id'] }}][image_title]" value="{{ product_description[language['language_id']] is defined ? product_description[language['language_id']]['image_title'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+			]]>
+            </add>
+        </operation>
+    </file>
+		
+	<file path="admin/controller/catalog/{product,category}.php">
+        <operation error="log">
+            <search><![CDATA[$this->load->model('design/layout');]]></search>
+            <add position="after"><![CDATA[
+				$data['text_h1'] = 'H1';
+				$data['text_h2'] = 'H2';
+				$data['text_image_alt'] = 'Image ALT';
+				$data['text_image_title'] = 'Image Title';
+			]]></add>
+        </operation>
+    </file>	
+		
+	<file path="admin/model/catalog/product.php">
+        <operation error="log">
+            <search><![CDATA[meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "']]></search>
+            <add position="replace"><![CDATA[meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "', h1 = '" . $this->db->escape($value['h1']) . "', h2 = '" . $this->db->escape($value['h2']) . "', image_alt = '" . $this->db->escape($value['image_alt']) . "', image_title = '" . $this->db->escape($value['image_title']) . "']]></add>
+        </operation>
+		<operation error="log">
+            <search><![CDATA[$result['meta_keyword'],]]></search>
+            <add position="after"><![CDATA['h1'     => $result['h1'],'h2'     => $result['h2'],'image_alt'     => $result['image_alt'],'image_title'     => $result['image_title'],]]></add>
+        </operation>
+    </file>	
+		
+	<!--Category page form-->
+	<file path="admin/view/template/catalog/category_form.twig">
+        <operation error="log">
+            <search><![CDATA[<label class="col-sm-2 control-label" for="input-meta-description{{ language.language_id }}">]]></search>
+            <add position="before"><![CDATA[
+			    <label class="col-sm-2 control-label">{{ text_h1 }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="category_description[{{ language['language_id'] }}][h1]" value="{{ category_description[language['language_id']] is defined ? category_description[language['language_id']]['h1'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_h2 }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="category_description[{{ language['language_id'] }}][h2]" value="{{ category_description[language['language_id']] is defined ? category_description[language['language_id']]['h2'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_image_alt }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="category_description[{{ language['language_id'] }}][image_alt]" value="{{ category_description[language['language_id']] is defined ? category_description[language['language_id']]['image_alt'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_image_title }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="category_description[{{ language['language_id'] }}][image_title]" value="{{ category_description[language['language_id']] is defined ? category_description[language['language_id']]['image_title'] : '' }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+			]]>
+            </add>
+        </operation>
+    </file>
+		
+		<file path="admin/model/catalog/category.php">
+            <operation error="log">
+                <search><![CDATA[meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "']]></search>
+                <add position="replace"><![CDATA[meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "',h1 = '" . $this->db->escape($value['h1']) . "',h2 = '" . $this->db->escape($value['h2']) . "',image_alt = '" . $this->db->escape($value['image_alt']) . "',image_title = '" . $this->db->escape($value['image_title']) . "']]></add>
+            </operation>
+			<operation error="log">
+                <search><![CDATA[$result['meta_keyword'],]]></search>
+                <add position="after"><![CDATA['h1'     => $result['h1'], 'h2'     => $result['h2'], 'image_alt'     => $result['image_alt'], 'image_title'     => $result['image_title'],]]></add>
+            </operation>
+        </file>	
+		
+	<!--Manufacturer page form-->
+	<file path="admin/view/template/catalog/manufacturer_form.twig">
+        <operation error="log">
+            <search><![CDATA[<label class="col-sm-2 control-label" for="input-image">]]></search>
+            <add position="before"><![CDATA[
+			    <label class="col-sm-2 control-label">{{ text_meta_title }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="meta_title" value="{{ meta_title }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_meta_description }}</label>
+                <div class="col-sm-10">
+                  <textarea name="meta_description" rows="5" class="form-control">{{ meta_description }}</textarea>
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_meta_keyword }}</label>
+                <div class="col-sm-10">
+                  <textarea name="meta_keyword" rows="5" class="form-control">{{ meta_keyword }}</textarea>
+                </div>
+            </div>
+			  
+			<div class="form-group">
+			    <label class="col-sm-2 control-label">{{ text_h1 }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="h1" value="{{ h1 }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_h2 }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="h2" value="{{ h2 }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_image_alt }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="image_alt" value="{{ image_alt }}"  class="form-control" />
+                </div>
+            </div>
+			  
+			<div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_image_title }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="image_title" value="{{ image_title }}"  class="form-control" />
+                </div>
+            </div>
+			  
+		    <div class="form-group">
+                <label class="col-sm-2 control-label">{{ text_description }}</label>
+                <div class="col-sm-10">
+                  <textarea name="description" id="description" class="form-control">{{ description }}</textarea>
+                </div>
+            </div>
+			  
+			<div class="form-group">
+			]]>
+            </add>
+        </operation>
+		
+		<operation error="log">
+            <search><![CDATA[{{ footer }}]]></search>
+            <add position="before"><![CDATA[
+			  <link href="view/javascript/codemirror/lib/codemirror.css" rel="stylesheet" />
+			  <link href="view/javascript/codemirror/theme/monokai.css" rel="stylesheet" />
+			  <script type="text/javascript" src="view/javascript/codemirror/lib/codemirror.js"></script> 
+			  <script type="text/javascript" src="view/javascript/codemirror/lib/xml.js"></script> 
+			  <script type="text/javascript" src="view/javascript/codemirror/lib/formatting.js"></script> 
+			  <script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>
+			  <link href="view/javascript/summernote/summernote.css" rel="stylesheet" />
+			  <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script> 
+			  <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
+
+			<script type="text/javascript">
+			$('#description').summernote({
+				height: 300
+			});</script>
+			]]></add>
+        </operation>
+    </file>
+	
+	<file path="admin/controller/catalog/manufacturer.php">
+        <operation error="log">
+            <search><![CDATA[$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);]]></search>
+            <add position="after"><![CDATA[
+			$data['text_meta_title'] = 'Meta Title';
+			$data['text_h1'] = 'H1';
+			$data['text_h2'] = 'H2';
+			$data['text_image_alt'] = 'Image ALT';
+			$data['text_image_title'] = 'Image Title';
+			$data['text_meta_description'] = 'Meta Description';
+			$data['text_meta_keyword'] = 'Meta Keyword';
+			$data['text_description'] = 'Description';
+			]]></add>
+        </operation>
+		
+		<operation error="log">
+            <search><![CDATA[if (isset($this->request->post['name'])) {]]></search>
+            <add position="before"><![CDATA[
+			if (isset($this->request->post['meta_title'])) {
+				$data['meta_title'] = $this->request->post['meta_title'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['meta_title'] = $manufacturer_info['meta_title'];
+			} else {
+				$data['meta_title'] = '';
+			}
+			
+			if (isset($this->request->post['h1'])) {
+				$data['h1'] = $this->request->post['h1'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['h1'] = $manufacturer_info['h1'];
+			} else {
+				$data['h1'] = '';
+			}
+			
+			if (isset($this->request->post['h2'])) {
+				$data['h2'] = $this->request->post['h2'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['h2'] = $manufacturer_info['h2'];
+			} else {
+				$data['h2'] = '';
+			}
+			
+			if (isset($this->request->post['image_alt'])) {
+				$data['image_alt'] = $this->request->post['image_alt'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['image_alt'] = $manufacturer_info['image_alt'];
+			} else {
+				$data['image_alt'] = '';
+			}
+			
+			if (isset($this->request->post['image_title'])) {
+				$data['image_title'] = $this->request->post['image_title'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['image_title'] = $manufacturer_info['image_title'];
+			} else {
+				$data['image_title'] = '';
+			}
+			
+			if (isset($this->request->post['meta_description'])) {
+				$data['meta_description'] = $this->request->post['meta_description'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['meta_description'] = $manufacturer_info['meta_description'];
+			} else {
+				$data['meta_description'] = '';
+			}
+			
+			if (isset($this->request->post['meta_keyword'])) {
+				$data['meta_keyword'] = $this->request->post['meta_keyword'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['meta_keyword'] = $manufacturer_info['meta_keyword'];
+			} else {
+				$data['meta_keyword'] = '';
+			}
+			
+			if (isset($this->request->post['description'])) {
+				$data['description'] = $this->request->post['description'];
+			} elseif (!empty($manufacturer_info)) {
+				$data['description'] = $manufacturer_info['brand_description'];
+			} else {
+				$data['description'] = '';
+			}
+			]]></add>
+        </operation>
+    </file>	
+	
+	<file path="admin/model/catalog/manufacturer.php">
+        <operation error="log">
+            <search><![CDATA[name = '" . $this->db->escape($data['name']) . "',]]></search>
+            <add position="replace"><![CDATA[name = '" . $this->db->escape($data['name']) . "', meta_title = '" . $this->db->escape($data['meta_title']) . "',h1 = '" . $this->db->escape($data['h1']) . "',h2 = '" . $this->db->escape($data['h2']) . "', image_alt = '" . $this->db->escape($data['image_alt']) . "', image_title = '" . $this->db->escape($data['image_title']) . "', meta_description = '" . $this->db->escape($data['meta_description']) . "',meta_keyword = '" . $this->db->escape($data['meta_keyword']) . "', brand_description = '" . $this->db->escape($data['description']) . "',]]></add>
+        </operation>
+    </file>	
+    
+    <!-- DISABLE META FIELD AS REQUIRED --> 
+	<file path="admin/controller/catalog/{product,category,information}.php">		
+		<operation>
+            <search position="replace"><![CDATA[if ((utf8_strlen($value['meta_title']) < 1) || (utf8_strlen($value['meta_title']) > 255)) {]]></search>
+            <add><![CDATA[if (1 <> 1) {]]>
+            </add>
+        </operation>
+    </file>
+    
+    <!-- STORE FRONT CHANGES -->
+    <!-- PRODUCT PAGE SEO --> 
+	<file path="catalog/controller/product/product.php">		
+		<operation error="log">
+            <search><![CDATA[$data['heading_title'] = $product_info['name'];]]></search>
+            <add position="replace">
+                <![CDATA[
+				$h1 = $product_info['h1'];
+				$h2 = $product_info['h2'];
+				$image_alt = $product_info['image_alt'];
+				$image_title = $product_info['image_title'];
+				
+				if (isset($h1) && strlen($h1) > 5){
+					$data['heading_title'] = $h1;
+				}else{
+					$data['heading_title'] = $product_info['name'];
+				}
+				
+				$data['h2'] = (isset($h2) && strlen($h2) > 5)? $h2 : '';
+				$data['image_alt'] = (isset($image_alt) && strlen($image_alt)>5)? $image_alt : $product_info['name']; 
+				$data['image_title'] = (isset($image_title) && strlen($image_title)>5)? $image_title : $product_info['name']; 
+			]]>
+            </add>
+        </operation>
+    </file>
+	
+	<file path="catalog/model/catalog/product.php">
+		<operation error="log">
+            <search><![CDATA[pd.name AS name,]]></search>
+            <add position="replace"><![CDATA[pd.name AS name, pd.meta_title as meta_title, pd.meta_description as meta_description, pd.meta_keyword as meta_keyword, pd.h1 as h1, pd.h2 as h2, pd.image_alt as image_alt, pd.image_title as image_title,]]></add>
+        </operation>		
+		<operation error="log">
+            <search><![CDATA[$query->row['meta_keyword'],]]></search>
+            <add position="replace"><![CDATA[$query->row['meta_keyword'], 'h1'     => $query->row['h1'],'h2'     => $query->row['h2'],'image_alt'     => $query->row['image_alt'], 'image_title'     => $query->row['image_title'],]]></add>
+        </operation>				
+    </file>
+	
+	<file path="catalog/view/theme/*/template/product/product.twig">
+        <operation error="log">
+            <search><![CDATA[alt="{{ heading_title }}"]]></search>
+            <add position="replace"><![CDATA[alt="{{ image_alt }}"]]></add>
+        </operation>
+        <operation error="log">
+            <search><![CDATA[title="{{ heading_title }}"]]></search>
+            <add position="replace"><![CDATA[title="{{ image_title }}"]]></add>
+        </operation>
+		<operation error="log">
+            <search><![CDATA[{{ description }}]]></search>
+            <add position="replace"><![CDATA[<h2>{{ h2 }}</h2>{{ description }}]]></add>
+        </operation>
+    </file>
+	
+	<!-- CATEGORY SEO -->
+	<file path="catalog/controller/product/category.php">		
+		<operation error="log">
+            <search><![CDATA[$data['heading_title'] = $category_info['name'];]]></search>
+            <add position="replace">
+                <![CDATA[
+				$h1 = $category_info['h1'];
+				$h2 = $category_info['h2'];
+				$image_alt = $category_info['image_alt'];
+				$image_title = $category_info['image_title'];
+				
+				$data['heading_title'] = (isset($h1) && strlen($h1) > 5) ? $h1 : $category_info['name'];				
+				$data['h2'] = (isset($h2) && strlen($h2)>5)? $h2 : '';
+				$data['image_alt'] = (isset($image_alt) && strlen($image_alt) > 5)? $image_alt : $category_info['name'];
+				$data['image_title'] = (isset($image_title) && strlen($image_title) > 5)? $image_title : $category_info['name'];
+				]]>
+            </add>
+        </operation>
+    </file>
+	
+	<file path="catalog/view/theme/*/template/product/category.twig">
+        <operation error="log">
+            <search><![CDATA[alt="{{ heading_title }}"]]></search>
+            <add position="replace"><![CDATA[alt="{{ image_alt }}"]]></add>
+        </operation>
+        <operation error="log">
+            <search><![CDATA[title="{{ heading_title }}"]]></search>
+            <add position="replace"><![CDATA[title="{{ image_title }}"]]></add>
+        </operation>
+		<operation error="log">
+            <search><![CDATA[{{ description }}]]></search>
+            <add position="replace"><![CDATA[<h2>{{ h2 }}</h2>{{ description }}]]></add>
+        </operation>
+		
+    </file>
+	<!-- BRAND SEO -->
+	<file path="catalog/controller/product/manufacturer.php">
+        <operation error="log">
+            <search><![CDATA[$this->document->setTitle($manufacturer_info['name']);]]></search>
+            <add position="replace"><![CDATA[
+            if (isset($this->request->get['page'])) {
+                $hb_page_number = ' ['.(int)$this->request->get['page'].']';
+            } else {
+                $hb_page_number = '';
+            }
+			if (!empty($manufacturer_info['meta_title'])){
+				$this->document->setTitle($manufacturer_info['meta_title'].$hb_page_number);
+			}else{
+				$this->document->setTitle($manufacturer_info['name']);
+			}
+			$this->document->setDescription($manufacturer_info['meta_description'].$hb_page_number);
+			$this->document->setKeywords($manufacturer_info['meta_keyword']);
+			$data['h2'] = $manufacturer_info['h2'];
+		
+			if ($manufacturer_info['image']) {
+				$data['thumb'] = $this->model_tool_image->resize($manufacturer_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_category_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_category_height'));
+			} else {
+				$data['thumb'] = '';
+			}
+			
+			$data['image_alt'] = $manufacturer_info['image_alt'];
+			$data['image_title'] = $manufacturer_info['image_title'];
+			$data['description'] = !empty($manufacturer_info['brand_description'])? html_entity_decode($manufacturer_info['brand_description']): '';]]>
+            </add>
+        </operation>
+		
+		<operation error="log">
+            <search><![CDATA[$data['heading_title'] = $manufacturer_info['name'];]]></search>
+            <add position="replace">
+                <![CDATA[
+			if (!empty($manufacturer_info['h1'])){
+				$data['heading_title'] = $manufacturer_info['h1'];
+			}else{
+				$data['heading_title'] = $manufacturer_info['name'];
+			}
+			]]>
+            </add>
+        </operation>		
+		
+    </file>
+	
+	<file path="catalog/view/theme/*/template/product/manufacturer_info.twig">
+		<operation error="log">
+            <search><![CDATA[<h2>{{ heading_title }}</h2>]]></search>
+            <add position="replace"><![CDATA[<h1>{{ heading_title }}</h1>
+            <h2>{{ h2 }}</h2>
+            {% if (thumb or description) %} 
+              <div class="row">
+                 {% if (thumb) %} 
+                <div class="col-sm-2"><img src="{{ thumb }}" alt="{{ image_alt }}" title="{{ image_title }}" class="img-thumbnail" /></div>
+                {% endif %}
+                {% if (description) %} 
+                <div class="col-sm-10">{{ description }}</div>
+                {% endif %}
+              </div>
+              <hr>
+            {% endif %}
+            ]]></add>
+        </operation>
+    </file>
+</modification>

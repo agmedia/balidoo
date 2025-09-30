@@ -1,0 +1,1 @@
+<textarea wrap="off" rows="15" readonly class="form-control"><?php echo $log; ?></textarea>
