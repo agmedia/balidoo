@@ -1,0 +1,303 @@
+<span class="TG_heading_text">{{ text_option_heading }}</span>  
+{% if products %} 
+<form method="post" id="tieredgifts_options">
+{% for product in products %} 
+    <div class="TG_options_product_item">
+        {% if product.thumb %} 
+            <div class="TG_image"><a href="{{ product.href }}"><img class="TG_options_image" src="{{ product.thumb }}" alt="{{ product.name }}" /></a></div>
+        {% endif %} 
+        {% if product.price %} 
+            {% if not product.special %} 
+                {% set Pprice = product.price %}
+            {% else %}   
+                {% set Pprice = product.special  %}
+            {% endif %} 
+        {% endif %} 
+        <div class="TG_options_product_field">
+            <a href="{{ product.href }}">{{ product.name }}</a>
+            <strong>{{ Pprice }}</strong>
+        </div>
+        {% if product.options %} 
+            <div class="options">
+                {% for option in product.options %} 
+                    {% if option.type == 'select' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <select name="option[{{ option.product_option_id }}]" class="form-control">
+                                <option value="">{{ text_select }}</option>
+                                {% for option_value in option.option_value %} 
+                                    <option value="{{ option_value.product_option_value_id }}">{{ option_value.name }}
+                                    {% if option_value.price %} 
+                                        ({{ option_value.price_prefix }}{{ option_value.price }})
+                                    {% endif %} 
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'radio' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            {% for option_value in option.option_value %} 
+                                <div class="radio">
+                                  <label for="option-value-{{ option_value.product_option_value_id }}">
+                                    <input type="radio" name="option[{{ option.product_option_id }}]" id="option-value-{{ option_value.product_option_value_id }}" value="{{ option_value.product_option_value_id }}">
+                                     {{ option_value.name }}
+                                     {% if option_value.price %} 
+                                        ({{ option_value.price_prefix }}{{ option_value.price }})
+                                     {% endif %} 
+                                  </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'checkbox' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            {% for option_value in option.option_value %} 
+                                <div class="checkbox">
+                                  <label for="option-value-{{ option_value.product_option_value_id }}">
+                                    <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" id="option-value-{{ option_value.product_option_value_id }}" />
+                                    {{ option_value.name }}
+                                    {% if option_value.price %} 
+                                            ({{ option_value.price_prefix }}{{ option_value.price }})
+                                    {% endif %} 
+                                  </label>
+                                </div>
+                             {% endfor %}
+                        </div>
+                    {% endif %}  
+                    {% if option.type == 'image' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <table class="option-image">
+                            {% for option_value in option.option_value %} 
+                                <tr>
+                                    <td style="width: 1px;"><input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" id="option-value-{{ option_value.product_option_value_id }}" /></td>
+                                    <td><label for="option-value-{{ option_value.product_option_value_id }}"><img src="{{ option_value.image }}" alt="{{ option_value.name ~ option_value.price ? ' ' ~ option_value.price_prefix ~ option_value.price : ''}}" /></label></td>
+                                    <td><label for="option-value-{{ option_value.product_option_value_id }}">{{ option_value.name }}
+                                    {% if option_value.price %} 
+                                        ({{ option_value.price_prefix }}{{ option_value.price }})
+                                    {% endif %} 
+                                    </label></td>
+                                </tr>
+                            {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}  
+                    {% if option.type == 'text' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <input type="text" class="form-control" name="option[{{ option.product_option_id }}]" value="{{ option.option_value }}" />
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'textarea' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <textarea  class="form-control" name="option[{{ option.product_option_id }}]" cols="16" rows="5">{{ option.option_value }}</textarea>
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'file' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+
+                            <button type="button" id="button-upload{{ option.product_option_id }}" data-loading-text="Loading..." class="btn btn-default btn-block"><i class="fa fa-upload"></i> {{ button_upload }}</button>
+                            <input type="hidden" name="option[{{ option.product_option_id }}]" value="" />
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'date' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <input type="text" data-date-format="YYYY-MM-DD" name="option[{{ option.product_option_id }}]" value="{{ option.option_value }}" class="TG_date form-control" />
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'datetime' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.option_value }}" class="TG_datetime form-control" />
+                        </div>
+                    {% endif %} 
+                    {% if option.type == 'time' %} 
+                        <div class="option">
+                            {% if option.required %} 
+                                <span class="required">*</span>
+                            {% endif %} 
+                            <b>{{ option.name }}:</b><br />
+                            <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.option_value }}" class="TG_time form-control" />
+                        </div>
+                    {% endif %} 
+                {% endfor %}
+            </div> <!-- <div class="options"> -->
+            {% endif %}
+        </div>
+<input type="hidden" name="quantity" value="1"/>
+<input type="hidden" name="product_id" value="{{ product.product_id }}" />
+{% endfor %}
+<div style="clear:both"></div>
+</form>
+<br />
+<div class="colorbox_footer">
+    <div class="add-to-cart">
+        <button type="button" id="button-cart" data-loading-text="Loading..." class="btn btn-primary btn-lg btn-block">{{button_cart}}</button>
+    </div>
+</div>
+    
+<script type="text/javascript">
+    $('#button-cart').on('click', function() {
+        $.ajax({
+            url: 'index.php?route=checkout/cart/add',
+            type: 'post',
+            data: $('#tieredgifts_options input[type=\'text\'], #tieredgifts_options input[type=\'hidden\'], #tieredgifts_options input[type=\'radio\']:checked, #tieredgifts_options input[type=\'checkbox\']:checked, #tieredgifts_options select, #tieredgifts_options textarea'),
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-cart').button('loading');
+            },
+            complete: function() {
+                $('#button-cart').button('reset');
+            },
+            success: function(json) {
+                $('.alert, .text-danger').remove();
+                $('.form-group').removeClass('has-error');
+
+                if (json['error']) {
+                    if (json['error']['option']) {
+                        for (i in json['error']['option']) {
+                            var element = $('#input-option' + i.replace('_', '-'));
+
+                            if (element.parent().hasClass('input-group')) {
+                                element.parent().after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+                            } else {
+                                element.after('<div class="text-danger">' + json['error']['option'][i] + '</div>');
+                            }
+                        }
+                    }
+
+                    if (json['error']['recurring']) {
+                        $('select[name=\'recurring_id\']').after('<div class="text-danger">' + json['error']['recurring'] + '</div>');
+                    }
+
+                    // Highlight any found errors
+                    $('.text-danger').parent().addClass('has-error');
+                }
+
+                if (json['success']) {
+
+                    $.fancybox.close();
+
+                    $('.breadcrumb').after('<div class="alert alert-success">' + json['success'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+                    $('#cart > button').html('<span id="cart-total"><i class="fa fa-shopping-cart"></i> ' + json['total'] + '</span>');
+
+                    $('html, body').animate({ scrollTop: 0 }, 'slow');
+
+                    $('#cart > ul').load('index.php?route=common/cart/info ul li');
+
+                    $('.product-layout').addClass('faded');
+                    setGiftsToUnavailable();
+
+                    {% if removeGiftFromCart %}
+                        $.ajax({
+                            url: '{{ removeGiftFromCart }}&cart_id={{ currentGift.cart_id }}',
+                            type: 'get',
+                            success: function(json) {  
+                                  location.reload();
+                            },
+                            error: function(xhr, ajaxOptions, thrownError) {
+                                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                            }
+                        });
+
+                    {% else %}
+                        location.reload();
+                    {% endif %}
+
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            }
+        });
+    });
+
+    $('.TG_date').datetimepicker({
+        pickTime: false
+    });
+    
+    $('.TG_datetime').datetimepicker({
+        pickDate: true,
+        pickTime: true
+    });
+    
+    $('.TG_time').datetimepicker({
+        pickDate: false
+    });
+
+    $('button[id^=\'button-upload\']').on('click', function() {
+        var node = this;
+        $('#form-upload').remove();
+        $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+        $('#form-upload input[name=\'file\']').trigger('click');
+        $('#form-upload input[name=\'file\']').on('change', function() {
+            $.ajax({
+                url: 'index.php?route=tool/upload',
+                type: 'post',
+                dataType: 'json',
+                data: new FormData($(this).parent()[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                beforeSend: function() {
+                    $(node).button('loading');
+                },
+                complete: function() {
+                    $(node).button('reset');
+                },
+                success: function(json) {
+                    $('.text-danger').remove();
+                    
+                    if (json['error']) {
+                        $(node).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
+                    }
+                    
+                    if (json['success']) {
+                        alert(json['success']);
+                        
+                        $(node).parent().find('input').attr('value', json['code']);
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+{% endif %}
+

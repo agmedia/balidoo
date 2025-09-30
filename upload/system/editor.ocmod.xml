@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<code>clicker_ckeditor</code>
+	<name>Cl!cker CKEditor Full integration - OC 3.0</name>
+	<version>5.0.15_CKE4.22.1</version>
+	<author>Cl!cker</author>
+	<link>https://opencart.click</link>
+
+	<file path="admin/controller/common/header.php">
+		<operation>
+			<search trim="true" index="0"><![CDATA[
+				$data['title'] =
+			]]></search>
+			<add position="after" trim="false" offset="0"><![CDATA[
+				if ($this->config->get('module_clicker_ckeditor_status')) {
+					$enable_ckeditor = true;
+
+					$exclude_ckeditor_routes = array(
+						'common/login',
+						'common/forgotten',
+						'common/reset',
+						'marketplace/modification',
+						'design/theme',
+						'module/journal2',
+					);
+
+					if (!empty($this->request->get['route'])) {
+						foreach ($exclude_ckeditor_routes as $exclude_ckeditor_route) {
+							if (strpos($this->request->get['route'], $exclude_ckeditor_route) === 0) {
+								$enable_ckeditor = false;
+								break;
+							}
+						}
+					} else {
+						$enable_ckeditor = false;
+					}
+
+					if ($enable_ckeditor) {
+						global $cke_settings, $cke_status;
+						$cke_settings = $this->load->controller('extension/module/clicker_ckeditor/getSettings');
+						$cke_status = $this->config->get('module_clicker_ckeditor_status');
+
+						$cke_plugins = $this->load->controller('extension/module/clicker_ckeditor/getPlugins');
+
+						if ($cke_plugins) {
+							$cke_settings['externalPlugins'] = $cke_plugins;
+						}
+
+						$cke_version = $this->load->controller('extension/module/clicker_ckeditor/getVersion');
+						$cke_t = date('Ymd000000');
+
+						$onload = 'cke_settings = ' . str_replace('"', "'", json_encode($cke_settings, JSON_HEX_QUOT)) . ';';
+						$onload .= "CKEDITOR.config.customConfig = 'clicker/config.js';";
+
+						$this->document->addScript('view/javascript/clicker_ckeditor/ckeditor.js' . '?t=' . date('YmdHis', filemtime(DIR_APPLICATION . 'view/javascript/clicker_ckeditor/ckeditor.js')) . '" onload="' . $onload);
+
+						$this->document->addScript('view/javascript/clicker_ckeditor/clicker/ck_clicker.js?oc=' . (defined('VERSION') ? urlencode(VERSION) : urlencode('3.x')) . '&v=' . urlencode($cke_version) . '&t=' . date('YmdHis', filemtime(DIR_APPLICATION . 'view/javascript/clicker_ckeditor/clicker/ck_clicker.js')));
+
+						$this->document->addScript('view/javascript/clicker_ckeditor/clicker/config.js' . '?t=' . date('YmdHis', filemtime(DIR_APPLICATION . 'view/javascript/clicker_ckeditor/clicker/config.js')));
+
+						$this->document->addStyle('view/javascript/clicker_ckeditor/clicker/ck_clicker.css' . '?t=' . date('YmdHis', filemtime(DIR_APPLICATION . 'view/javascript/clicker_ckeditor/clicker/ck_clicker.css')));
+					}
+				}
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="system/library/response.php">
+		<operation>
+			<search trim="true" index="0"><![CDATA[
+				function output(
+			]]></search>
+			<add position="after" trim="false" offset="0"><![CDATA[
+				// Replace Summernote paths if CKEditor Full is enabled
+				global $cke_settings, $cke_status;
+
+				if (!empty($cke_status) && !empty($this->output) && defined('DIR_CATALOG')) {
+
+					$parts = explode('</head>', $this->output, 2);
+
+					if (!empty($parts[0]) && strpos($parts[0], 'view/javascript/clicker_ckeditor/clicker/config.js') !== false) {
+						$search = array(
+							'view/javascript' . '/summernote/summernote.css' => 'view/javascript/clicker_ckeditor/clicker/summernote/summernote.css',
+							'view/javascript' . '/summernote/summernote.js' => 'view/javascript/clicker_ckeditor/clicker/summernote/summernote.js',
+							'view/javascript' . '/summernote/summernote-image-attributes.js' => 'view/javascript/clicker_ckeditor/clicker/summernote/summernote-image-attributes.js',
+							'view/javascript' . '/summernote/opencart.js' => 'view/javascript/clicker_ckeditor/clicker/summernote/opencart.js',
+							'view/javascript' . '/summernote/' => 'view/javascript/clicker_ckeditor/clicker/summernote/', // OC3.0.3.8
+						);
+
+						$this->output = str_replace(array_keys($search), array_values($search), $this->output);
+					}
+				}
+			]]></add>
+		</operation>
+	</file>
+
+</modification>

@@ -1,0 +1,71 @@
+# nod_modules in view folder
+/upload/catalog/view/node_modules
+
+# Config and Htaccess Files
+/upload/.htaccess
+/upload/config.php
+/upload/admin/config.php
+
+# Image Cache Files
+/upload/image/cache/*
+/upload/image/*
+
+/upload/image/cache/*
+!/upload/image/cache/index.html
+
+# Backup Files
+/upload/system/storage/backup/*
+!/upload/system/storage/backup/index.html
+/storage/backup/*
+!/storage/backup/index.html
+
+# System Cache Files
+/upload/system/storage/cache/*
+!/upload/system/storage/cache/index.html
+/storage/cache/*
+!/storage/cache/index.html
+
+/storage/modification/*
+!/storage/modification/index.html
+
+# Download Files
+/upload/system/storage/download/*
+!/upload/system/storage/download/index.html
+/storage/download/*
+!/storage/download/index.html
+
+# Log Files
+/upload/system/storage/logs/*
+!/upload/system/storage/logs/index.html
+/storage/logs/*
+!/storage/logs/index.html
+
+# Marketplace Files
+/upload/system/storage/marketplace/*
+!/upload/system/storage/marketplace/index.html
+/storage/marketplace/*
+!/storage/marketplace/index.html
+
+# Session Files
+/upload/system/storage/session/*
+!/upload/system/storage/session/index.html
+/storage/session/*
+!/storage/session/index.html
+
+# Upload Files
+/upload/system/storage/upload/*
+!/upload/system/storage/upload/index.html
+!/upload/storage/upload/csv/
+!/upload/storage/upload/assets/
+/storage/upload/*
+!/storage/upload/index.html
+!/storage/upload/luceed_json/
+!/storage/upload/assets/
+
+# IDE Project files
+/.idea
+/upload/.idea
+
+# Custom
+/upload/env.php/upload/image/catalog/
+/upload/test_api.php

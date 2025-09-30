@@ -1,0 +1,111 @@
+<div class="widget module{{ module }} {% if columns != 'list' %} grid{% endif %}{% if contrast %} contrast-bg{% endif %}{% if carousel and rows > 1 %}  multiple-rows{% endif %}" {% if use_margin %}style="margin-bottom: {{ margin }}"{% endif %}> 
+{% if block_title %}
+<!-- Block Title -->
+<div class="widget-title">
+{% if title_preline %}<h4><b>{{ title_preline }}</b></h4>{% endif %}
+{% if title %} 
+
+{% if title_subline == 'Balidoo kids'%} 
+
+         <img src="image/balidoo-kids-logo-black.svg" class="logo-balidoo" alt="Balidoo Kids">
+
+{% endif %}
+
+{% if title_subline == 'Balidoo underwear'%} 
+
+         <img src="image/balidoo-underwear-logo-black.svg" class="logo-balidoo" alt="Balidoo Kids">
+
+{% endif %}
+<h3 class="main-title">{{ title }}</h3>
+
+{% endif %}
+{% if title_subline %}
+<!-- <p class="sub-line"><span>{{ title_subline }}</span></p> -->
+{% endif %}
+</div>
+{% endif %}
+{% if tabs|length > 1 %}
+<!-- Tabs -->
+<ul id="tabs-{{ module }}" class="nav nav-tabs {{ tabstyle }}" data-tabs="tabs" style="">
+    {% for keyTab, tab in tabs %}
+        {% if keyTab == 0 %}
+        <li class="active"><a href="#tab{{ module }}{{ keyTab }}" data-toggle="tab">{{ tab.title }}</a></li>
+        {% else %}
+        <li><a href="#tab{{ module }}{{ keyTab }}" data-toggle="tab">{{ tab.title }}</a></li>
+        {% endif %}
+    {% endfor %}
+</ul>
+{% endif %}
+<div class="tab-content has-carousel ">
+<!-- Product Group(s) -->
+{% for key, tab in tabs %}
+<div class="tab-pane{% if key == 0 %} active in{% endif %} fade" id="tab{{ module }}{{ key }}">
+    <div class="grid-holder grid{{ columns }} prod_module{{ module }}{% if carousel %} carousel{% endif %}{% if carousel_a and rows > 1 %} sticky-arrows{% endif %}">
+        {% for product in tab.products %}
+                 {% include 'basel/template/product/single_product.twig' %}
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% if use_button %}
+<!-- Button -->
+<div class="widget_bottom_btn {% if carousel and carousel_b %}has-dots{% endif %}">
+<a class="btn btn-outline" href="{{ link_href ? link_href : '' }}">{{ link_title }}</a>
+</div>
+{% endif %}
+</div>
+<div class="clearfix"></div>
+</div>
+{% if carousel %}
+<script>
+$('.grid-holder.prod_module{{ module }}').slick({
+{% if carousel_a %}
+prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
+nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+accessibility: false,
+{% else %}
+arrows: false,
+{% endif %}
+{% if direction == 'rtl' %}
+rtl: true,
+{% endif %}
+{% if carousel_b %}
+dots:true,
+{% endif %}
+respondTo:'min',
+rows:{{ rows }},
+{% if columns == '5' %}
+slidesToShow:5,slidesToScroll:5,responsive:[{breakpoint:1100,settings:{slidesToShow:4,slidesToScroll:4}},{breakpoint:960,settings:{slidesToShow:3,slidesToScroll:3}},{breakpoint:600,settings:{slidesToShow:1,slidesToScroll:1}},
+{% elseif columns == '4' %}
+slidesToShow:4,slidesToScroll:4,responsive:[{breakpoint:960,settings:{slidesToShow:3,slidesToScroll:3}},{breakpoint:600,settings:{slidesToShow:2,slidesToScroll:2}},
+{% elseif columns == '3' %}
+slidesToShow:3,slidesToScroll:3,responsive:[{breakpoint:600,settings:{slidesToShow:2,slidesToScroll:2}},
+{% elseif columns == '2' %}
+slidesToShow:2,slidesToScroll:2,responsive:[
+{% elseif columns == '1' or columns == 'list' %}
+adaptiveHeight:true,slidesToShow:1,slidesToScroll:1,responsive:[
+{% endif %}
+{% if items_mobile_fw %}
+{breakpoint:420,settings:{slidesToShow:1,slidesToScroll:1}}
+{% endif %}
+]
+});
+$('.product-style2 .single-product .icon').attr('data-placement', 'top');
+$('[data-toggle=\'tooltip\']').tooltip({container: 'body'});
+{% if carousel_a and rows > 1 %}
+$(window).load(function() {
+var p_c_o = $('.prod_module{{ module }}').offset().top;
+var p_c_o_b = $('.prod_module{{ module }}').offset().top + $('.prod_module{{ module }}').outerHeight(true) - 100;
+var p_sticky_arrows = function(){
+var p_m_o = $(window).scrollTop() + ($(window).height()/2);
+if (p_m_o > p_c_o && p_m_o < p_c_o_b) {
+$('.prod_module{{ module }} .slick-arrow').addClass('visible').css('top', p_m_o - p_c_o + 'px');
+} else {
+$('.prod_module{{ module }} .slick-arrow').removeClass('visible');
+}
+};
+$(window).scroll(function() {p_sticky_arrows();});
+});
+{% endif %}
+</script>
+{% endif %}

@@ -1,0 +1,188 @@
+{{ header }}
+<div class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-md-9 col-sm-8' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }} infopage">{{ content_top }}
+    <div class="blog blog_post">
+    
+   {% if main_thumb and blogsetting_post_thumb %}
+    <div class="main_thumb">
+    <img src="{{ main_thumb }}" class="rounded" alt="{{ heading_title }}" title="{{ heading_title }}" />
+    {% if post_date_added_status %}
+    <div class="date_added">
+    <span class="day">{{ date_added_day }}</span>
+    <b class="month">{{ date_added_month }}</b>
+    </div>
+    {% endif %}
+    </div>
+    {% endif %}
+    
+	<h1 id="page-title" class="contrast-font">{{ heading_title }}</h1>
+	
+    <div class="blog_stats">
+	{% if post_author_status %}<i>{{ text_posted_by }}: {{ author }}</i>{% endif %}
+	{% if post_page_view_status %}<i>{{ text_read }}: {{ new_read_counter_value }}</i>{% endif %}
+	{% if post_comments_count_status %}<i>{{ text_comments }}: {{ comment_total }}</i>{% endif %}
+	</div>
+    
+    <div class="main_description">
+	{{ description }}
+    </div>
+    
+    {% if tags %}
+	<p class="post_tags">
+    {{ text_tags }}
+	{% for i in 0..tags|length %}
+    {% if i < (tags|length - 1) %} 
+    <a href="{{ tags[i].href }}">{{ tags[i].tag }}</a>,
+    {% else %} 
+    <a href="{{ tags[i].href }}">{{ tags[i].tag }}</a> {% endif %}
+    {% endfor %}
+	</p>
+	{% endif %}
+	
+    {% if share_status %}
+	<div class="lg-share">
+    <div class="social-icons round inversed">
+    <a class="icon facebook fb_share external" rel="nofollow"><i class="fa fa-facebook"></i></a>
+    <a class="icon twitter twitter_share external" rel="nofollow"><i class="fa fa-twitter"></i></a>
+    <a class="icon google google_share external" rel="nofollow"><i class="icon-google-plus"></i></a>
+    <a class="icon pinterest pinterest_share external" rel="nofollow"><i class="fa fa-pinterest"></i></a>
+    <a class="icon vk vk_share external" rel="nofollow"><i class="fa fa-vk"></i></a>
+    </div>
+    </div>
+    {% endif %}
+	
+    <!-- Related Products -->
+    {% if products %}
+     <div class="widget widget-related">
+
+        <div class="widget-title">
+            <p class="main-title">Možda vas zanima</p>
+
+        </div>
+
+        <div class="grid grid-holder related carousel grid4">
+            {% for product in products %} {% include 'basel/template/product/single_product.twig' %} {% endfor %}
+        </div>
+    </div>
+      {% endif %}
+	 <!-- Related Products End -->
+     
+     
+     {% if related_blogs %}
+		<h3 class="section-title"><b>{{ text_related_blog }}</b></h3>
+        <div class="grid-holder grid{{ rel_per_row }}">
+            {% for blog in related_blogs %}
+            <div class="item single-blog related">
+                {% if blog.image and rel_thumb_status %}
+                <div class="banner_wrap hover-zoom hover-darken">
+				<img class="zoom_image" src="{{ blog.image }}" alt="{{ blog.title }}" title="{{ blog.title }}" />
+                <a href="{{ blog.href }}" class="effect-holder"></a>
+                {% if date_added_status %}
+                <div class="date_added">
+                <span class="day">{{ blog.date_added_full|date('d') }}</span>
+                <b class="month">{{ blog.date_added_full|date('M') }}</b>
+                </div>
+                {% endif %}
+                {% if blog.tags %}
+                <div class="tags-wrapper">
+                <div class="tags primary-bg-color">
+                {% for tag in blog.tags|slice(0,2) %}
+                <a href="index.php?route=extension/blog/home&tag={{ tag|trim }}">{{ tag|trim }}</a>
+                {% endfor %}
+                </div>
+                </div>
+                {% endif %}
+                </div>
+				{% endif %}
+                <div class="summary">
+                <h3 class="blog-title"><a href="{{ blog.href }}">{{ blog.title }}</a></h3>
+                <div class="blog_stats">
+                {% if author_status %}<i>{{ text_posted_by }}: {{ blog.author }}</i>{% endif %}
+				{% if comments_count_status %}<i>{{ text_comments }}: {{ blog.comment_total }}</i>{% endif %}
+                {% if page_view_status %}<i>{{ text_read }}: {{ blog.count_read }}</i>{% endif %}
+                </div>
+				<p class="short-description">{{ blog.short_description }}</p>
+                <a class="u-lined" href="{{ blog.href }}">{{ text_read_more }}</a>
+                </div>
+               </div>
+			{% endfor %}           
+		</div>
+	{% endif %}
+	 <!-- Related Blog End -->
+	 
+   
+      </div>
+     
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+
+
+{% if products %}
+<script>
+    <!--
+            $('.grid-holder.related').slick({
+                prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
+                nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+                dots:true,
+                                respondTo:'min',
+                                    slidesToShow:4,slidesToScroll:4,responsive:[{breakpoint:960,settings:{slidesToShow:3,slidesToScroll:3}},{breakpoint:600,settings:{slidesToShow:2,slidesToScroll:2}},
+                                            ]
+            });
+            $('.product-style2 .single-product .icon').attr('data-placement', 'top');
+            $('[data-toggle=\'tooltip\']').tooltip({container: 'body'});
+            //-->
+</script>
+{% endif %} 
+
+
+<script type="application/ld+json">
+{
+"@context": "http://schema.org",
+"@type": "NewsArticle",
+"mainEntityOfPage": {
+"@type": "WebPage",
+"@id": "https://google.com/article"
+},
+"headline": "{{ heading_title }}",
+{% if main_thumb %}
+"image": {
+"@type": "ImageObject",
+"url": "{{ main_thumb }}",
+"height": {{ img_height }},
+"width": {{ img_width }}
+},
+{% endif %}
+"datePublished": "{{ date_added_full }}",
+"dateModified": "{{ date_added_full }}",
+"author": {
+"@type": "Person",
+"name": "{{ author }}"
+},
+"publisher": {
+"@type": "Organization",
+"name": "{{ store }}",
+{% if logo %}
+"logo": {
+"@type": "ImageObject",
+"url": "{{ logo }}"
+}
+{% endif %}
+},
+"description": "{{ short_description }}"
+}
+</script>
+{{ footer }} 

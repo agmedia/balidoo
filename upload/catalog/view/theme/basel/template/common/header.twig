@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<!--[if IE 8 ]><html dir="{{ direction }}" lang="{{ lang }}" class="ie8"><![endif]-->
+<!--[if IE 9 ]><html dir="{{ direction }}" lang="{{ lang }}" class="ie9"><![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html dir="{{ direction }}" lang="{{ lang }}">
+<!--<![endif]-->
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>{{ title }}</title>
+<base href="{{ base }}" />
+{% if description %}<meta name="description" content="{{ description }}" />{% endif %}
+{% if keywords %}<meta name="keywords" content= "{{ keywords }}" />{% endif %}
+<!-- Load essential resources -->
+<script src="catalog/view/javascript/jquery/jquery-2.1.1.min.js"></script>
+<link href="catalog/view/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+<script src="catalog/view/javascript/bootstrap/js/bootstrap.min.js"></script>
+<script src="catalog/view/theme/basel/js/slick.min.js"></script>
+<script src="catalog/view/theme/basel/js/basel_common.js"></script>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="msapplication-TileColor" content="#000000">
+<meta name="theme-color" content="#ffffff">
+<meta name="google-site-verification" content="c9LFDn8M2cdfdmxt40-zuVrzPyE_UGsQYMZhwT6gcfA" />
+<!-- Main stylesheet -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link href="catalog/view/theme/basel/stylesheet/stylesheet.css" rel="stylesheet">
+<!-- Mandatory Theme Settings CSS -->
+<style id="basel-mandatory-css">{{ basel_mandatory_css }}</style>
+<!-- Plugin Stylesheet(s) -->
+{% for style in styles %}
+<link href="{{ style.href }}" rel="{{ style.rel }}" media="{{ style.media }}" />
+{% endfor %}
+
+<!-- Pluing scripts(s) -->
+{% for script in scripts %}
+<script src="{{ script }}"></script>
+{% endfor %}
+<!-- Page specific meta information -->
+{% for link in links %}
+{% if link.rel == 'image' %}
+<meta property="og:image" content="{{ link.href }}" />
+{% else %}
+<link href="{{ link.href }}" rel="{{ link.rel }}" />
+{% endif %}
+{% endfor %}
+<!-- Analytic tools -->
+{% for analytic in analytics %}
+{{ analytic }}
+{% endfor %}
+{% if basel_styles_status %}
+<!-- Custom Color Scheme -->
+<style id="basel-color-scheme">{{ basel_styles_cache }};</style>
+{% endif %}
+{% if basel_typo_status %}
+<!-- Custom Fonts -->
+<style id="basel-fonts">{{ basel_fonts_cache }}</style>
+{% endif %}
+{% if basel_custom_css_status %}
+<!-- Custom CSS -->
+<style id="basel-custom-css">
+{{ basel_custom_css }}
+</style>
+{% endif %}
+{% if basel_custom_js_status %}
+<!-- Custom Javascript -->
+<script>
+{{ basel_custom_js }}
+</script>
+{% endif %}
+
+
+</head>
+<body class="{{ class }}{{ basel_body_class }}">
+{% include 'basel/template/common/mobile-nav.twig' %}
+<div class="outer-container main-wrapper">
+{% if notification_status %}
+<div class="top_notificaiton">
+  <div class="container{% if top_promo_close %} has-close{% endif %} {{ top_promo_width }} {{ top_promo_align }}">
+    <div class="table">
+    <div class="table-cell w100"><div class="ellipsis-wrap">{{ top_promo_text }}</div></div>
+    {% if top_promo_close %}
+    <div class="table-cell text-right">
+    <a onClick="addCookie('basel_top_promo', 1, 30);$(this).closest('.top_notificaiton').slideUp();" class="top_promo_close">&times;</a>
+    </div>
+    {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% include 'basel/template/common/headers/' ~ basel_header ~ '.twig' %}
+<div class="container">
+{{ position_top }}
+</div>
+
+
+<!-- breadcrumb -->
+<div class="container">
+<div class="breadcrumb-holder">
+
+<span id="title-holder">&nbsp;</span>
+<div class="links-holder">
+<a class="basel-back-btn" onClick="history.go(-1); return false;"><i></i></a><span>&nbsp;</span>
+</div>
+</div>
+</div>
+

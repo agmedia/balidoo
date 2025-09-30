@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<modification>
+    <name>Flexi filter</name>
+    <code>flexi_filter</code>
+    <version>2.0</version>
+    <author>TemplateMaza.com</author>
+    <link></link>
+    <!--admin-->
+    <file path="admin/controller/startup/startup.php">
+        <operation>
+                <search><![CDATA[$this->registry->set('cart']]></search>
+                <add position="after"><![CDATA[
+                // Maza filter startup
+                $this->load->controller('extension/maza/startup/tf_filter');
+                ]]></add>
+        </operation>
+    </file>
+    
+    <!--Catalog-->
+    <file path="catalog/controller/startup/startup.php">
+        <operation>
+                <search><![CDATA[$this->registry->set('cart']]></search>
+                <add position="after"><![CDATA[
+                // Maza filter startup
+                $this->load->controller('extension/maza/startup/tf_filter');
+                ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/product/special.php">
+        <operation>
+                <search><![CDATA[getProductSpecials(]]></search>
+                <add position="replace"><![CDATA[getProducts(]]></add>
+        </operation>
+        <operation>
+                <search><![CDATA[getTotalProductSpecials(]]></search>
+                <add position="replace"><![CDATA[getTotalProducts($filter_data]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/product/{category,search,manufacturer,special}.php">
+        <operation>
+                <search><![CDATA[getProducts(]]></search>
+                <add position="before" offset='2'><![CDATA[
+                // Flexi filter
+                $filter_data = $this->load->controller('extension/module/tf_filter/filter_data', $filter_data);
+                ]]></add>
+        </operation>
+        <operation>
+                <search><![CDATA[$url = '';]]></search>
+                <add position="after"><![CDATA[
+                // Flexi filter
+                $url .= $this->load->controller('extension/module/tf_filter/url', $url);
+                ]]></add>
+        </operation>
+        <operation>
+                <search><![CDATA[$this->load->controller('common/column_left')]]></search>
+                <add position="before"><![CDATA[
+                    if(!isset($this->request->get['_tf_ajax'])){
+                ]]></add>
+        </operation>
+        <operation>
+                <search regex="true"><![CDATA[~\$this->response->setOutput\(\$this->load->view\('([^';]+)', \$data\)\);~]]></search>
+                <add position="replace"><![CDATA[
+                        $this->response->setOutput($this->load->view('$1', $data));
+                    } else {
+                        $data['column_left'] = $data['column_right'] = $data['content_top'] = $data['content_bottom'] = $data['footer'] = $data['header'] = '';
+                        $this->response->addHeader('Content-Type: application/json');
+                        $this->response->setOutput(json_encode(['content' => $this->load->view('$1', $data),
+                            'filter' => $this->load->controller('extension/module/tf_filter/getPostFilterValues')]));
+                    }
+                ]]></add>
+        </operation>
+    </file>
+    
+    <!--System-->
+    <file path="system/library/cart/tax.php">
+        <operation>
+                <search><![CDATA[function __construct(]]></search>
+                <add position="before"><![CDATA[
+        public function tf_getTaxRates(){
+            return $this->tax_rates;
+        }
+                ]]></add>
+        </operation>
+    </file>
+    <file path="system/engine/loader.php">
+        <operation>
+            <search><![CDATA[($result && !$result instanceof Exception)]]></search>
+            <add position="replace"><![CDATA[(!is_null($result) && !$result instanceof Exception)]]></add>
+        </operation>
+    </file>
+</modification>

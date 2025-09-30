@@ -1,0 +1,277 @@
+{% if block_full_width %}
+</div>
+{% endif %}
+<div class="widget cm_module" style="{{ module_margins }}">
+{% if block_title %}
+<!-- Block Title -->
+<div class="widget-title">
+{% if title_preline %}<p class="pre-line">{{ title_preline }}</p>{% endif %}
+{% if title %}
+<p class="main-title"><span>{{ title }}</span></p>
+<p class="widget-title-separator"><i class="icon-line-cross"></i></p>
+{% endif %}
+{% if title_subline %}
+<p class="sub-line"><span>{{ title_subline }}</span></p>
+{% endif %}
+</div>
+{% endif %}
+<div class="cm_block_wrapper">
+{% if bg_video %}<div class="vid-holder"></div>{% endif %}
+<div class="cm_block {{ module }} " id="m{{ module }}" style="{{ block_style }};">
+<div class="{% if not content_full_width and block_full_width %}container{% endif %}">
+{% if columns %}
+<div class="cm_content" style="{{ content_style }};">
+<div class="row {% if content_no_margin %}marginless{% endif %}">
+{% for column in columns %}
+<div class="{{ column.column_class }} type-{{ column.type }} cm_column {% if equal_height %}eq_height{% endif %}">    
+{% if column.type == "img" %}
+    {% if column.data2 %}
+    <!-- Banner type -->
+    <div class="banner_wrap">
+        <div class="zoom_image_wrap">
+            <img class="zoom_image border-radius-10px" src="{{ column.data2 }}" alt="" />
+        </div>
+        <div class="effect-holder" aria-hidden="true"></div>
+        <div class="banner_overlay">
+            {% if column.data5 %}
+            <a href="{{ column.data5 }}" class="cm_item_wrapper pointer">
+            {% else %}
+            <div class="cm_item_wrapper">
+            {% endif %}
+                <div class="cm_item {{ column.data7 }}">
+                    {{ column.data1 }}
+                </div>
+            {% if column.data5 %}
+            </a>
+            {% else %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if column.data4 %}
+    <div class="banner_wrap">
+        <div class="zoom_image_wrap">
+            <img class="zoom_image" src="{{ column.data4 }}" alt="" />
+        </div>
+         <div class="effect-holder" aria-hidden="true"></div>
+        <div class="banner_overlay">
+            {% if column.data6 %}
+            <a href="{{ column.data6 }}" class="cm_item_wrapper pointer">
+            {% else %}
+            <div class="cm_item_wrapper">
+            {% endif %}
+                <div class="cm_item {{ column.data8 }}">
+                    {{ column.data3 }}
+                </div>
+            {% if column.data6 %}
+            </a>
+            {% else %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+
+
+{% elseif column.type == "tm" %}
+    <!-- Testimonial type -->
+    {% if testimonials %}
+    <div class="grid-holder {{ column.data8 }} tm_module grid{{ column.data7 }}">
+    {% for testimonial in testimonials %}
+    <div class="item single-testimonial">
+        <div class="testimonial-wrap">
+        {% if testimonial.image %}
+        <p><img src="{{ testimonial.image }}" alt=""/></p>
+        {% endif %}
+        <p>{{ testimonial.description }}</p>
+        <p><b>{{ testimonial.name }}</b>{% if testimonial.org %} - {{ testimonial.org }}{% endif %}</p> 
+        </div>    
+    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    No testimonials found
+    {% endif %}
+{% else %}
+    <!-- HTML/Newsletter type -->
+    <div class="cm_item_wrapper">
+        <div class="cm_item {{ column.data7 }} text-center">
+            {{ column.data1 }}
+        </div>
+    </div>
+{% endif %}
+</div>    
+{% endfor %}
+</div>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+{% if block_full_width %}
+<div class="container">
+{% endif %}
+{% if para_status and bg_img %}
+<script>
+$(window).load(function(){
+$('.cm_block.{{ module }}').parallax("50%", 0.{{ para_status }});
+})
+</script>
+{% endif %}
+{% if bg_video %}
+<script>
+$('.vid-holder').tuber({
+videoId: '{{ video_id }}',
+isBackground: false
+});
+</script>
+{% endif %}
+
+{% if columns %}
+{% for column in columns %}
+{% if column.type == "tm" %}
+<script><!--
+$('.grid-holder.tm_module').slick({
+adaptiveHeight:true,
+dots:true,
+{% if direction == 'rtl' %}
+rtl: true,
+{% endif %}
+arrows: false,
+respondTo:'min',
+{% if column.data7 == '3' %}
+slidesToShow:3,slidesToScroll:3,responsive:[{breakpoint:960,settings:{slidesToShow:1,slidesToScroll:1}}],
+{% elseif column.data7 == '2' %}
+slidesToShow:2,slidesToScroll:2,responsive:[{breakpoint:960,settings:{slidesToShow:1,slidesToScroll:1}}]
+{% elseif column.data7 == '1' %}
+slidesToShow:1,slidesToScroll:1,responsive:[]
+{% endif %}
+}).parents('.cm_block_wrapper').addClass('has-testimonials');
+//--></script>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const block = document.getElementById('m3');
+  const content = block?.querySelector('.cm_content');
+  const row = content?.querySelector('.row.marginless');
+  if (!block || !content || !row) return;
+
+  // 1) Ubrizgaj CSS (keyframes + osnovni stilovi)
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ag_marquee_slide {
+      from { transform: translate3d(0,0,0); }
+      to   { transform: translate3d(var(--ag-shift, -50%),0,0); }
+    }
+    #m3 .ag-track {
+      display:flex; flex-wrap:nowrap; align-items:center; gap:20px;
+      will-change: transform;
+      animation: ag_marquee_slide linear infinite;
+    }
+    #m3 .ag-col,
+    #m3 .ag-col * { flex:0 0 auto; }
+  `;
+  document.head.appendChild(style);
+
+  // 2) Sakrij horizontalni scroll
+  block.style.overflow = 'hidden';
+  content.style.overflowX = 'hidden';
+
+  // 3) Normaliziraj vertikalno poravnanje (bez mijenjanja HTML-a)
+  row.style.display = 'block'; // prestajemo animirati originalni .row
+  // Napravi unutarnji "track" u koji ćemo premjestiti sadržaj
+  const track = document.createElement('div');
+  track.className = 'ag-track';
+  content.appendChild(track);
+
+  // 4) Premjesti SVE postojeće kolone u track i označi ih (.ag-col)
+  const originals = Array.from(row.children);
+  originals.forEach(el => {
+    el.classList.add('ag-col');
+    track.appendChild(el);
+  });
+
+  // 5) Dupliraj sadržaj za seamless efekt (ne koristimo innerHTML)
+  originals.forEach(el => track.appendChild(el.cloneNode(true)));
+
+  // 6) Stilovi za poravnanje teksta i ikona (JS-only)
+  track.querySelectorAll('.cm_item_wrapper, .cm_item, .promo-style-3').forEach(el => {
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.whiteSpace = 'nowrap';
+    el.style.gap = '10px';
+    el.style.color = '#fff';
+  });
+  track.querySelectorAll('.promo-style-3 h3').forEach(h => {
+    h.style.margin = '0';
+    h.style.lineHeight = '1.2';
+    h.style.display = 'block';
+  });
+  // Ikone: width:auto, visina fiksna (poravnate vertikalno)
+  const ICON_H = 24;
+  track.querySelectorAll('.promo-style-3 .icon img').forEach(img => {
+    img.style.display = 'block';
+    img.style.height = ICON_H + 'px';
+    img.style.width  = 'auto';
+  });
+
+  // 7) Pričekaj slike + fontove prije mjerenja (iOS!)
+  function waitReady(el){
+    const imgs = Array.from(el.querySelectorAll('img'));
+    const imgPromises = imgs.map(img => img.complete ? Promise.resolve()
+      : new Promise(res => img.addEventListener('load', res, {once:true})));
+    const fonts = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    return Promise.all([...imgPromises, fonts]);
+  }
+
+  // 8) Izračun širine prve polovice i postavljanje animacije
+  function setAnimation() {
+    // širina prve polovice = ukupna širina svih originala
+    let firstHalfWidth = 0;
+    for (let i = 0; i < originals.length; i++) {
+      const el = track.children[i];
+      const rect = el.getBoundingClientRect();
+      // uključimo i gap od 20px između stavki (osim nakon zadnje)
+      firstHalfWidth += rect.width + (i < originals.length - 1 ? 20 : 0);
+    }
+
+    // Shift kroz keyframes do NEGATIVNE širine prve polovice
+    track.style.setProperty('--ag-shift', `${-firstHalfWidth}px`);
+
+    // Brzina: ~80 px/s (promijeni po želji)
+    const seconds = Math.max(10, Math.round(firstHalfWidth / 80));
+    track.style.animationDuration = seconds + 's';
+  }
+
+  function init() {
+    setAnimation();
+  }
+
+  // 9) Reakcija na resize/orijentaciju (iOS Safari)
+  let t;
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      // ponovno izmjeri jer se širine mijenjaju
+      init();
+    }, 120);
+  });
+
+  // Start kad je sve spremno
+  waitReady(track).then(init);
+  window.addEventListener('load', init);
+});
+</script>
+
+
+
+
+
+

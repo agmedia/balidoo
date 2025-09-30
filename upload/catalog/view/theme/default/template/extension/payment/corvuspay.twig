@@ -1,0 +1,44 @@
+<form name="pay" action="{{ action }}" method="post">
+
+<input id="target" name="target" value="_top" hidden="true"/>
+
+<input id="mode" name="mode" value="form" hidden="true"/>
+
+ <input type="hidden" name="store_id" value="{{ merchant }}">
+
+ <input id="require_complete"  name="require_complete" value="true" hidden="true"/> 
+
+<input type="hidden" name="order_number" value="{{ order_id }}">
+
+<input type="hidden" name="amount" value="{{ total }}">
+
+<input type="hidden" name="hash" value="{{ md5 }}">
+
+<input id="currency" name="currency" value="{{ currency }}" hidden="true"/>
+
+<input id="cart"  name="cart" value="Web shop kupnja - {{ order_id }}" hidden="true"/>
+
+<input id="language" name="language" value="{{ language }}" hidden="true"/>
+
+<input type="hidden" name="cardholder_name" value="{{ firstname }}">
+<input type="hidden" name="cardholder_surname" value="{{ lastname }}">
+<input type="hidden" name="cardholder_address" value="{{ address }}">
+<input type="hidden" name="cardholder_city" value="{{ city}}">
+<input type="hidden" name="cardholder_country" value="{{ country }}">
+<input type="hidden" name="cardholder_zip_code" value="{{ postcode }}">
+<input type="hidden" name="cardholder_phone" value="{{ telephone }}">
+<input type="hidden" name="cardholder_email" value="{{ email }}">
+<input type="hidden" name="payment_all" value="{{ number_of_installments }}">
+
+
+
+<div class="buttons pull-right">
+     <input type="submit" value="{{ button_confirm }}" class="btn btn-primary" />
+        
+        
+    </div>
+    <div class="clearfix"></div>
+    
+</form>
+
+

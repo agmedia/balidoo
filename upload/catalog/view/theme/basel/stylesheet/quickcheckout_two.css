@@ -1,0 +1,17 @@
+.quickcheckoutleft {
+	width: 49%;
+	float: left;
+	margin-top:5px;
+	border-right:1px solid #d4d4d4;
+}
+.quickcheckoutright {
+	width: 49%;
+	float: right;
+	margin-top:5px;
+}
+.quickcheckoutmid {
+	width: 100%;
+}
+.totals-slip {
+	margin-top:10px;
+}

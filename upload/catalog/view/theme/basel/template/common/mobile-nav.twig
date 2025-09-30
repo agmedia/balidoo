@@ -1,0 +1,138 @@
+<div class="main-menu-wrapper ">
+    <div class="closemenu">
+        <div class="icon-element mnu">
+            <a class="shortcut-wrapper menu-closer " title="Navigacija">
+                <i class="icon-line-cross icon"></i>
+            </a>
+        </div>
+    </div>
+<ul class="mobile-top">
+    {% if header_search %}
+    <li class="search" style="height: 44px;">
+
+         <div class="search-holder-mobile">
+         <label style="display:unset">
+        <input type="text" name="search-mobile" value="" placeholder="Pretraživanje" class="form-control" /><a class="fa fa-search"></a>
+        </label>
+        </div>
+    </li>
+    {% endif %}
+</ul>
+<ul class="mobile-top lang">
+     <li class="mobile-lang-curr "></li>
+    </ul>
+
+{% if secondary_menu %}
+<ul class="categories">
+    {% if secondary_menu == 'oc' %}
+        <!-- Default menu -->
+        {{ default_menu }}
+    {% elseif secondary_menu is defined %}
+        <!-- Mega menu -->
+        {% for key, row in secondary_menu_mobile %}
+            {% include 'basel/template/common/menus/mega_menu.twig' %}
+        {% endfor %}
+    {% endif %}
+</ul>
+{% endif %}
+<ul class="categories">
+    {% include 'basel/template/common/static_links.twig' %}
+</ul>
+
+{% if primary_menu %}
+<ul class="categories">
+{% if primary_menu == 'oc' %}
+<!-- Default menu -->
+{{ default_menu }}
+{% elseif primary_menu is defined %}
+<!-- Mega menu -->
+{% for key, row in primary_menu_mobile %}
+{% include 'basel/template/common/menus/mega_menu.twig' %}
+{% endfor %}
+
+
+
+<li class="open has-sub dropdown-wrapper from-bottom">
+<a class="description  open">
+<span class="top">
+    <strong>Korisnička podrška</strong></span>
+    </a>
+<!-- Sub Menu items -->
+<!-- if full width -->
+<div class="narrow" >
+<div class="dropdown-inner">
+<div class="row">
+<div class="col-xs-12 col-sm-12 ">
+<div class="menu-item">
+<!-- HTML CONTENT -->
+<div class="html hover-menu">
+<ul class="bottom-menu">
+<li><i class="icon-mail"></i> <a href="#"> webshop@balidoo.com </a></li>
+<li><i class="icon-phone"></i> <a href="#"> +385 98 902 4556 </a></li>
+</ul>
+<small>Pon - Pet 07:00 - 15:00</small>
+</div>
+</div>
+</div>
+</div> <!-- row -->
+</div>
+</div>
+</li>
+
+<li class="open has-sub dropdown-wrapper from-bottom">
+<a class="description ">
+<span class="top">
+    <strong>Pratite nas</strong></span> <i class="fa fa-angle-down"></i>
+    </a>
+<!-- Sub Menu items -->
+<!-- if full width -->
+<div class="dropdown-content sub-holder dropdown-left narrow" >
+<div class="dropdown-inner">
+<div class="row">
+<div class="col-xs-12 col-sm-12 ">
+<div class="menu-item">
+<!-- HTML CONTENT -->
+<div class="html hover-menu">
+<ul>
+<li><a href="https://www.instagram.com/balidoo_kids/?hl=hr" aria-label="Follow us on Instagram"><i class="fa  fa-instagram"></i> Balidoo Kids</a></li>
+<li><a href="https://www.facebook.com/Balidoo.CroatiaClothingManufacturer/" aria-label="Follow us on Facebook"><i class="fa fa-facebook-square"></i> Balidoo Kids</a></li>
+<li><a href="https://www.instagram.com/kozo_bodywear/" aria-label="Follow us on Instagram"><i class="fa  fa-instagram"></i> Balidoo Underwear</a></li>
+<li><a href="https://www.facebook.com/KOZO.bodywear/" aria-label="Follow us on Facebook"><i class="fa fa-facebook-square"></i> Balidoo Underwear</a></li>
+
+<li><a href="https://www.linkedin.com/company/balidoo/" aria-label="Follow us on Linkedin"><i class="fa  fa-linkedin"></i> Balidoo Corporate</a></li>
+</ul>
+
+</div>
+</div>
+</div>
+</div> <!-- row -->
+</div>
+</div>
+</li>
+
+<li class="open has-sub dropdown-wrapper from-bottom">
+<!-- Sub Menu items -->
+<!-- if full width -->
+<div class="narrow" >
+<div class="dropdown-inner">
+<div class="row">
+<div class="col-xs-12 col-sm-12 ">
+<div class="menu-item">
+<!-- HTML CONTENT -->
+<div class="html hover-menu">
+
+<a class="btn btn-primary" href="https://www.balidoo.com/">Korporativne stranice</a>
+
+</div>
+</div>
+</div>
+</div> <!-- row -->
+</div>
+</div>
+</li>
+
+{% endif %}
+</ul>
+{% endif %}
+</div>
+<span class="body-cover menu-closer"></span>

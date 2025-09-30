@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<name>Oc 3.0.3.6 Fix OCMOD Not working with Twig</name>
+	<code>Oc 3.0.3.6 Fix OCMOD Not working with Twig</code>
+	<version>3.0.3.6</version>
+	<author>P-developer</author>
+
+	<file path="system/library/template/twig.php">	
+	     <operation>
+			<search><![CDATA[ $file = DIR_TEMPLATE . $filename . '.twig'; ]]></search>
+			<add position="replace"><![CDATA[ 
+           	$file = modification( DIR_TEMPLATE . $filename . '.twig' );
+			]]></add>
+		</operation>
+	</file>	
+</modification>
