@@ -471,104 +471,124 @@ class ControllerExtensionBaselBaselFeatures extends Controller {
     }
 
     // Newsletter Subscribe
-    public function subscribe() {
+    public function subscribe()
+    {
         /*******************************************************************************
-        *                                Copyright : AGmedia                           *
-        *                              email: filip@agmedia.hr                         *
-        *******************************************************************************/
+         *                                Copyright : AGmedia                           *
+         *                              email: filip@agmedia.hr                         *
+         *******************************************************************************/
         $this->load->language('basel/basel_theme');
+        $this->response->addHeader('Content-Type: application/json');
 
-        $json = array();
+        $json = [];
 
-        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
-            if ( ! filter_var($this->request->post['email'], FILTER_VALIDATE_EMAIL)){
-                $json['error'] = $this->language->get('basel_subscribe_invalid_email');
+        if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+            $json['error'] = 'Invalid request method.';
+            return $this->response->setOutput(json_encode($json));
+        }
+
+        $email = isset($this->request->post['email']) ? trim(strtolower($this->request->post['email'])) : '';
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $json['error'] = $this->language->get('basel_subscribe_invalid_email');
+            $json['color'] = '#FFCACA';
+            return $this->response->setOutput(json_encode($json));
+        }
+
+        // --- Mailchimp config iz tvog configa ---
+        $apiKey = agconf('mailchimp.api_key');   // npr. 4569...-us18
+        $server = agconf('mailchimp.server');    // "us18"
+        $listId = agconf('mailchimp.list_id');   // "5d2b9f4871"
+
+        // Fallback: ako server nije postavljen, izvuci ga iz API key-a
+        if (!$server && strpos($apiKey, '-') !== false) {
+            [, $dc] = explode('-', $apiKey, 2);
+            $server = $dc;
+        }
+
+        if (!$apiKey || !$server || !$listId) {
+            $json['error'] = 'Mailchimp configuration missing (api_key/server/list_id).';
+            $json['color'] = '#FFCACA';
+            return $this->response->setOutput(json_encode($json));
+        }
+
+        // Logiraj koji će se host koristiti, radi dijagnostike
+        \Agmedia\Helpers\Log::info('Mailchimp DC host: ' . $server . '.api.mailchimp.com', 'mailchimp_debug');
+
+        $mailchimp = new \MailchimpMarketing\ApiClient();
+        $mailchimp->setConfig([
+            'apiKey' => $apiKey,
+            'server' => $server // "us18" — SDK sam gradi https://us18.api.mailchimp.com/3.0
+        ]);
+
+        $subscriberHash = md5($email);
+
+        try {
+            // Idempotentni upsert: uvijek završi kao "subscribed"
+            $mcResponse = $mailchimp->lists->setListMember($listId, $subscriberHash, [
+                "email_address" => $email,
+                "status_if_new" => "subscribed",
+                "status"        => "subscribed",
+                // "merge_fields" => ["FNAME" => "", "LNAME" => ""],
+            ]);
+
+            // Lokalna evidencija (ako želiš zadržati postojeće OpenCart bilježenje)
+            $this->load->model('extension/basel/newsletter');
+            if ($this->model_extension_basel_newsletter->checkRegistered(['email' => $email])) {
+                $this->model_extension_basel_newsletter->UpdateRegistered(['email' => $email], 1);
+            } elseif (!$this->model_extension_basel_newsletter->checkExist(['email' => $email])) {
+                $this->model_extension_basel_newsletter->subscribe(['email' => $email]);
+            }
+
+            // Potvrdni mail
+            $mail = new Mail();
+            $mail->protocol      = $this->config->get('config_mail_protocol');
+            $mail->parameter     = $this->config->get('config_mail_parameter');
+            $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+            $mail->smtp_username = $this->config->get('config_mail_smtp_username');
+            $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+            $mail->smtp_port     = $this->config->get('config_mail_smtp_port');
+            $mail->smtp_timeout  = $this->config->get('config_mail_smtp_timeout');
+
+            $mail->setTo($email);
+            $mail->setFrom(agconf('mailchimp.newsletter.from'));
+            $mail->setSender(html_entity_decode(agconf('mailchimp.newsletter.title'), ENT_QUOTES, 'UTF-8'));
+            $mail->setSubject(html_entity_decode(sprintf(agconf('mailchimp.newsletter.subject'), agconf('mailchimp.newsletter.title')), ENT_QUOTES, 'UTF-8'));
+            $mail->setHtml(agconf('mailchimp.newsletter.html'));
+            $mail->send();
+
+            $json['success'] = agconf('mailchimp.newsletter.success');
+            $json['color']   = '#DAFFCA';
+            $json['code']    = agconf('mailchimp.newsletter.code');
+
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            // npr. cURL error 6 — DNS/host
+            \Agmedia\Helpers\Log::info($e->getMessage(), 'mailchimp_error');
+            $json['error'] = 'Mailchimp connection failed (DNS/Network). Provjeri da je "server" = us18 i da server ima izlaz na 443.';
+            $json['color'] = '#FFCACA';
+        } catch (\MailchimpMarketing\ApiException $e) {
+            \Agmedia\Helpers\Log::info($e->getMessage(), 'mailchimp_error');
+
+            $body = method_exists($e, 'getResponseBody') ? $e->getResponseBody() : null;
+            $title = is_object($body) && isset($body->title) ? $body->title : '';
+
+            if (stripos($title, 'Member In Compliance State') !== false) {
+                $json['error'] = agconf('mailchimp.newsletter.unsubscribed');
+                $json['color'] = '#FFEECA';
+            } else {
+                $json['error'] = agconf('mailchimp.newsletter.error');
                 $json['color'] = '#FFCACA';
             }
-
-            if ( ! isset($json['error'])) {
-                $mailchimp = new \MailchimpMarketing\ApiClient();
-                $mailchimp->setConfig([
-                    'apiKey' => agconf('mailchimp.api_key'),
-                    'server' => agconf('mailchimp.server')
-                ]);
-
-                try {
-                    $response = $mailchimp->lists->getListMember(agconf('mailchimp.list_id'), md5(strtolower($this->request->post['email'])));
-                } catch (\Exception $e) {
-                    $response = $e->getCode();
-                    \Agmedia\Helpers\Log::info($e->getMessage(), 'mailchimp_error');
-                }
-
-                if (isset($response->status)) {
-                    if ($response->status == 'subscribed') {
-                        $json['error'] = agconf('mailchimp.newsletter.subscribed');
-                        $json['color'] = '#FFEECA';
-                    }
-
-                    if ($response->status == 'unsubscribed') {
-                        $json['error'] = agconf('mailchimp.newsletter.unsubscribed');
-                        $json['color'] = '#FFEECA';
-                    }
-
-                } else {
-                    try {
-                        $mailchimp->lists->addListMember(agconf('mailchimp.list_id'), [
-                            "email_address" => $this->request->post['email'],
-                            "status" => "subscribed",
-                        ]);
-                    } catch (\MailchimpMarketing\ApiException $e) {
-                        $json['error'] = agconf('mailchimp.newsletter.error');
-                        $json['color'] = '#FFCACA';
-                        \Agmedia\Helpers\Log::info($e->getMessage(), 'mailchimp_error');
-                    }
-
-                    if ( ! isset($json['error'])) {
-                        $json['success'] = agconf('mailchimp.newsletter.success');
-                        $json['color'] = '#DAFFCA';
-                        $json['code'] = agconf('mailchimp.newsletter.code');
-
-                        $mail = new Mail();
-                        $mail->protocol = $this->config->get('config_mail_protocol');
-                        $mail->parameter = $this->config->get('config_mail_parameter');
-                        $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-                        $mail->smtp_username = $this->config->get('config_mail_smtp_username');
-                        $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-                        $mail->smtp_port = $this->config->get('config_mail_smtp_port');
-                        $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
-                        $mail->setTo($this->request->post['email']);
-                        $mail->setFrom(agconf('mailchimp.newsletter.from'));
-                        $mail->setSender(html_entity_decode(agconf('mailchimp.newsletter.title'), ENT_QUOTES, 'UTF-8'));
-                        $mail->setSubject(html_entity_decode(sprintf(agconf('mailchimp.newsletter.subject'), agconf('mailchimp.newsletter.title')), ENT_QUOTES, 'UTF-8'));
-                        $mail->setHtml(agconf('mailchimp.newsletter.html'));
-                        $mail->send();
-                    }
-                }
-            }
+        } catch (\Exception $e) {
+            \Agmedia\Helpers\Log::info($e->getMessage(), 'mailchimp_error');
+            $json['error'] = agconf('mailchimp.newsletter.error');
+            $json['color'] = '#FFCACA';
         }
+
         /*******************************************************************************
-        *                              END Copyright : AGmedia                         *
-        *******************************************************************************/
-
-        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
-            if(!filter_var($this->request->post['email'], FILTER_VALIDATE_EMAIL)){
-                //$error = $this->language->get('basel_subscribe_invalid_email');
-            }
-            if (!isset($error)) {
-                $this->load->model('extension/basel/newsletter');
-                if($this->model_extension_basel_newsletter->checkRegistered($this->request->post)){
-                    $this->model_extension_basel_newsletter->UpdateRegistered($this->request->post,1);
-                    $success = $this->language->get('basel_subscribe_success');
-                } else if ($this->model_extension_basel_newsletter->checkExist($this->request->post)){
-                    $error = $this->language->get('basel_subscribe_email_exist');
-                } else {
-                    $this->model_extension_basel_newsletter->subscribe($this->request->post);
-                    $success = $this->language->get('basel_subscribe_success');
-                }
-            }
-        }
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
+         *                              END Copyright : AGmedia                         *
+         *******************************************************************************/
+        return $this->response->setOutput(json_encode($json));
     }
 
 // Newsletter Unsubscribe
