@@ -496,9 +496,9 @@ class ControllerExtensionBaselBaselFeatures extends Controller {
         }
 
         // --- Mailchimp config iz tvog configa ---
-        $apiKey = agconf('mailchimp.api_key');   // npr. 4569...-us18
-        $server = agconf('mailchimp.server');    // "us18"
-        $listId = agconf('mailchimp.list_id');   // "5d2b9f4871"
+        $apiKey = '692f7811c353921ffb1f47cfde379f5f-us22';   // npr. 4569...-us18
+        $server = 'us22';    // "us18"
+        $listId = '0a99e9ec55';   // "5d2b9f4871"
 
         // Fallback: ako server nije postavljen, izvuci ga iz API key-a
         if (!$server && strpos($apiKey, '-') !== false) {
