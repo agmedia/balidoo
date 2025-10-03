@@ -13,23 +13,32 @@ class ModelExtensionModuleProductImportManager extends Model
     {
         $language_id = (int)$this->config->get('config_language_id');
 
-        // 0) briši postojeće opcije + vrijednosti
-        $this->deleteProductOptions($product_id);
+        // (A) UZMI POSTOJEĆI option_id IZ CONFIGA
+        $option_id = (int)(agconf('erp.size_option_id') ?? 0);
 
-        // 1) uzmi ili kreiraj "Veličina" select opciju
-        $option_id = $this->getOrCreateOption('Veličina', 'select', $language_id, [
-            'en-gb' => 'Size'
-        ]);
+        if (!$option_id) {
+            // fallback: pokušaj naći po nazivu u BILO kojem jeziku
+            $option_id = $this->findOptionIdByNameAnyLang(['Veličina','Velicina','Size']);
+            if (!$option_id) {
+                // ako NIŠTA ne postoji, tek onda kreiraj (ali to je iznimka)
+                $option_id = $this->createOptionWithNames([
+                    $language_id => 'Veličina'
+                ], 'select', ['en-gb' => 'Size']);
+            }
+        }
 
-        // 2) insert product_option
+        // (B) BRIŠI SAMO “Veličina” ZA TAJ PROIZVOD (ne sve opcije!)
+        $this->deleteOneProductOption($product_id, $option_id);
+
+        // (C) INSERT product_option za taj option_id
         $this->db->query("INSERT INTO " . DB_PREFIX . "product_option 
-                          SET product_id = " . (int)$product_id . ", 
-                              option_id = " . (int)$option_id . ",
-                              value = '',
-                              required = 1");
+                      SET product_id = " . (int)$product_id . ", 
+                          option_id = " . (int)$option_id . ",
+                          value = '',
+                          required = 1");
         $product_option_id = $this->db->getLastId();
 
-        // 3) osiguraj option_value + insert product_option_value
+        // (D) Ubaci vrijednosti + SKU
         $inserted_pov = 0;
         foreach ($items as $i => $row) {
             $name         = $this->db->escape($row['name']);
@@ -42,32 +51,36 @@ class ModelExtensionModuleProductImportManager extends Model
             $weight       = (float)($row['weight'] ?? 0);
             $weight_prefix= $this->db->escape($row['weight_prefix'] ?? '+');
             $sort_order   = (int)($row['sort_order'] ?? $i);
-
-            // DODAJ OVO:
-            $sku          = $this->db->escape($row['sku'] ?? ''); // <-- NOVO
+            $sku          = $this->db->escape($row['sku'] ?? '');   // ← OBAVEZNO
 
             $option_value_id = $this->getOrCreateOptionValue($option_id, $name, $language_id, $sort_order);
 
-            $this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value
-                              SET product_option_id = " . (int)$product_option_id . ",
-                                  product_id        = " . (int)$product_id . ",
-                                  option_id         = " . (int)$option_id . ",
-                                  option_value_id   = " . (int)$option_value_id . ",
-                                  quantity          = " . (int)$quantity . ",
-                                  subtract          = " . (int)$subtract . ",
-                                  price             = '" . $price . "',
-                                  price_prefix      = '" . $price_prefix . "',
-                                  points            = " . (int)$points . ",
-                                  points_prefix     = '" . $points_prefix . "',
-                                  weight            = '" . $weight . "',
-                                   weight_prefix     = '" . $weight_prefix . "',
-                                 sku               = '" . $sku . "'");
+            // Ako nisi 100% da stupac postoji, možeš koristiti guard (vidi dolje)
+            $sql = "INSERT INTO " . DB_PREFIX . "product_option_value
+                SET product_option_id = " . (int)$product_option_id . ",
+                    product_id        = " . (int)$product_id . ",
+                    option_id         = " . (int)$option_id . ",
+                    option_value_id   = " . (int)$option_value_id . ",
+                    quantity          = " . (int)$quantity . ",
+                    subtract          = " . (int)$subtract . ",
+                    price             = '" . $price . "',
+                    price_prefix      = '" . $price_prefix . "',
+                    points            = " . (int)$points . ",
+                    points_prefix     = '" . $points_prefix . "',
+                    weight            = '" . $weight . "',
+                    weight_prefix     = '" . $weight_prefix . "'";
 
+            if ($this->povHasSkuColumn()) {
+                $sql .= ", sku = '" . $sku . "'";
+            }
+
+            $this->db->query($sql);
             $inserted_pov++;
         }
 
         return ['product_option' => 1, 'product_option_value' => $inserted_pov];
     }
+
 
     // === HELPERS ===
 
@@ -160,4 +173,68 @@ class ModelExtensionModuleProductImportManager extends Model
                                WHERE code = '" . $this->db->escape($code) . "' LIMIT 1");
         return $q->num_rows ? (int)$q->row['language_id'] : null;
     }
+    private function deleteOneProductOption(int $product_id, int $option_id): void
+    {
+        // pobriši vrijednosti za baš taj option_id
+        $this->db->query("DELETE pov FROM " . DB_PREFIX . "product_option_value pov
+                      JOIN " . DB_PREFIX . "product_option po 
+                        ON po.product_option_id = pov.product_option_id
+                     WHERE po.product_id = " . (int)$product_id . "
+                       AND po.option_id  = " . (int)$option_id);
+
+        // pobriši i sam product_option za taj option_id
+        $this->db->query("DELETE FROM " . DB_PREFIX . "product_option 
+                      WHERE product_id = " . (int)$product_id . "
+                        AND option_id  = " . (int)$option_id);
+    }
+
+    private function findOptionIdByNameAnyLang(array $names): ?int
+    {
+        $names_esc = array_map(function($n){ return "'" . $this->db->escape($n) . "'"; }, $names);
+        $q = $this->db->query("SELECT o.option_id
+                             FROM " . DB_PREFIX . "option o
+                             JOIN " . DB_PREFIX . "option_description od
+                               ON od.option_id = o.option_id
+                            WHERE od.name IN (" . implode(',', $names_esc) . ")
+                              AND o.type = 'select'
+                            LIMIT 1");
+        return $q->num_rows ? (int)$q->row['option_id'] : null;
+    }
+
+    private function createOptionWithNames(array $names_by_lang_id, string $type, array $extra_by_code = []): int
+    {
+        $this->db->query("INSERT INTO " . DB_PREFIX . "option 
+                      SET type = '" . $this->db->escape($type) . "', sort_order = 0");
+        $option_id = (int)$this->db->getLastId();
+
+        foreach ($names_by_lang_id as $lang_id => $label) {
+            $this->db->query("INSERT INTO " . DB_PREFIX . "option_description 
+                          SET option_id = " . (int)$option_id . ",
+                              language_id = " . (int)$lang_id . ",
+                              name = '" . $this->db->escape($label) . "'");
+        }
+
+        foreach ($extra_by_code as $code => $label) {
+            $lang_id = $this->getLanguageIdByCode($code);
+            if ($lang_id) {
+                $this->db->query("INSERT INTO " . DB_PREFIX . "option_description 
+                              SET option_id = " . (int)$option_id . ",
+                                  language_id = " . (int)$lang_id . ",
+                                  name = '" . $this->db->escape($label) . "'");
+            }
+        }
+
+        return $option_id;
+    }
+
+    private function povHasSkuColumn(): bool
+    {
+        static $has = null;
+        if ($has === null) {
+            $q = $this->db->query("SHOW COLUMNS FROM " . DB_PREFIX . "product_option_value LIKE 'sku'");
+            $has = (bool)$q->num_rows;
+        }
+        return $has;
+    }
+
 }
