@@ -245,6 +245,14 @@ class ControllerProductProduct extends Controller {
             $data['upc'] = $product_info['upc'];
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
 
+
+            $proizvod_extras = $this->model_catalog_product->getProizvodExtras($product_info['model']);
+
+            $data['napomene'] = $proizvod_extras['napomene'] ?? '';
+            $data['sastav'] = $proizvod_extras['sastav'] ?? '';
+            $data['kvaliteta'] = $proizvod_extras['kvaliteta'] ?? '';
+            $data['garancija'] = $proizvod_extras['garancija'] ?? '';
+
 			if ($product_info['quantity'] <= 0) {
 				$data['stock'] = $product_info['stock_status'];
 			} elseif ($this->config->get('config_stock_display')) {

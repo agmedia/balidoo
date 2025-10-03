@@ -601,4 +601,10 @@ public function getProductRelated($product_id) {
 			return 0;
 		}
 	}
+
+    public function getProizvodExtras($model) {
+        $query = $this->db->query("SELECT napomene, sastav, kvaliteta, garancija FROM proizvodi WHERE sifra = '" . $this->db->escape($model) . "' LIMIT 1");
+        return $query->row;
+    }
+
 }
