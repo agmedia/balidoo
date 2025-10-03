@@ -4,44 +4,40 @@
     <div class="container-fluid">
       <div class="pull-right">
         <button type="submit" form="form-product" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
 
-      <button type="button" id="btn-sync-erp" class="btn btn-info">
-        <i class="fa fa-refresh"></i> {{ text_sync_erp ?? 'Sync ERP Options' }}
+      <button type="button" id="btn-sync-erp-options" class="btn btn-warning">
+        <i class="fa fa-sliders"></i> {{ text_sync_erp_options ?? 'Sync ERP Options Only' }}
       </button>
-
-      <script type="text/javascript">
+      </div>
+      <script>
         (function(){
-          var btn = document.getElementById('btn-sync-erp');
-          if(!btn) return;
+          var btn = document.getElementById('btn-sync-erp-options');
+          if (!btn) return;
 
           btn.addEventListener('click', function(){
             btn.disabled = true;
 
-            var url = 'index.php?route=extension/module/product_import_manager/syncOptions'
+            var url = 'index.php?route=extension/module/product_import_manager/syncOptionsOnly'
                     + '&product_id={{ product_id }}'
                     + '&user_token={{ user_token|default(token) }}';
 
-            fetch(url, { headers: { 'Accept': 'application/json' }})
-                    .then(function(r){ return r.json(); })
-                    .then(function(json){
+            fetch(url, { headers: { 'Accept':'application/json' }})
+                    .then(r => r.json())
+                    .then(json => {
                       if (json.error) {
-                        alert('ERP sync error: ' + json.message);
+                        alert('ERP options sync error: ' + json.error);
                       } else {
-                        alert('ERP sync OK. Updated options: ' + (json.updated ? json.updated.product_option : 0));
-                        // Po želji: automatski refresh forme da vidiš opcije
+                        alert('Options replaced. Inserted PO: ' + json.counts.product_option + ', POV: ' + json.counts.product_option_value);
                         location.reload();
                       }
                     })
-                    .catch(function(err){
-                      alert('Request failed: ' + err);
-                    })
-                    .finally(function(){
-                      btn.disabled = false;
-                    });
+                    .catch(err => alert('Request failed: ' + err))
+                    .finally(() => btn.disabled = false);
           });
         })();
       </script>
+
 
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">

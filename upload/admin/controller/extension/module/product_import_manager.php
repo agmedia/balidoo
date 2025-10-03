@@ -213,4 +213,65 @@ class ControllerExtensionModuleProductImportManager extends Controller
         }
     }
 
+
+    public function syncOptionsOnly()
+    {
+        $token_key = isset($this->request->get['user_token']) ? 'user_token' : 'token';
+
+        if (!isset($this->request->get[$token_key]) || !isset($this->request->get['product_id'])) {
+            return $this->json(['error' => 'Missing token or product_id']);
+        }
+
+        $product_id = (int)$this->request->get['product_id'];
+
+        $this->load->model('catalog/product');
+        $product_info = $this->model_catalog_product->getProduct($product_id);
+
+        if (!$product_info) {
+            return $this->json(['error' => 'Product not found']);
+        }
+
+        $model = $product_info['model']; // npr. U7023
+
+        try {
+            // 1) Povuci opcije iz ERP-a prema MODEL-u (= odjel po tvom zahtjevu)
+            $service = new \Agmedia\Service\Service();
+            $option  = new \Agmedia\Models\Option\Option();
+
+            $options = $option->make(
+                $service->getOptions($model)  // sif_roba/getodjel/{MODEL}&webshop=0
+            );
+
+            // tvoj builder Product->make radi puno više (slike, desc, itd.)
+            // Ovdje trebaju SAMO opcije. Ako ih builder ne daje odvojeno,
+            // možeš koristiti samo dio koji puni 'product_option'.
+            $ag_options = $options->toArray();
+            // Ako tvoj Option::make već vraća strukturu u OC formatu:
+            // $ag_options_oc = [ [ 'option_id'=>..., 'type'=>..., 'product_option_value'=>[...] ], ...];
+
+            // 2) DROP stare opcije i INSERT nove (raw SQL preko modela)
+            $this->load->model('extension/module/product_import_manager'); // custom model dolje
+            $inserted = $this->model_extension_module_product_import_manager
+                ->replaceProductOptions($product_id, $ag_options);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Product options replaced from ERP.',
+                'counts'  => $inserted
+            ]);
+
+        } catch (\Throwable $e) {
+            \Agmedia\Helpers\Log::write($e->getMessage(), 'erp_sync_options_error');
+            return $this->json(['error' => $e->getMessage()]);
+        }
+    }
+
+    private function json($payload)
+    {
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($payload));
+        return;
+    }
+
+
 }
