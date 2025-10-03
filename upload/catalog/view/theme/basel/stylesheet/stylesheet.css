@@ -13,7 +13,7 @@ body {
 	width: 100vw;
 	font-size:1.5rem;
 		font-family:"Poppins", sans-serif;
-	line-height:1.4;
+	line-height:1.7;
 	transition:margin-left 500ms, margin-right 500ms;
 }
 body, .product-name.main-font, .gridlist .single-product .product-name, .gridlist .single-blog .blog-title, #title-holder #page-title {
