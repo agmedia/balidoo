@@ -5,6 +5,44 @@
       <div class="pull-right">
         <button type="submit" form="form-product" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
         <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+
+      <button type="button" id="btn-sync-erp" class="btn btn-info">
+        <i class="fa fa-refresh"></i> {{ text_sync_erp ?? 'Sync ERP Options' }}
+      </button>
+
+      <script type="text/javascript">
+        (function(){
+          var btn = document.getElementById('btn-sync-erp');
+          if(!btn) return;
+
+          btn.addEventListener('click', function(){
+            btn.disabled = true;
+
+            var url = 'index.php?route=extension/module/product_import_manager/syncOptions'
+                    + '&product_id={{ product_id }}'
+                    + '&user_token={{ user_token|default(token) }}';
+
+            fetch(url, { headers: { 'Accept': 'application/json' }})
+                    .then(function(r){ return r.json(); })
+                    .then(function(json){
+                      if (json.error) {
+                        alert('ERP sync error: ' + json.message);
+                      } else {
+                        alert('ERP sync OK. Updated options: ' + (json.updated ? json.updated.product_option : 0));
+                        // Po želji: automatski refresh forme da vidiš opcije
+                        location.reload();
+                      }
+                    })
+                    .catch(function(err){
+                      alert('Request failed: ' + err);
+                    })
+                    .finally(function(){
+                      btn.disabled = false;
+                    });
+          });
+        })();
+      </script>
+
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
         {% for breadcrumb in breadcrumbs %}
