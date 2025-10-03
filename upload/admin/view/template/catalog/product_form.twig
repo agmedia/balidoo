@@ -6,40 +6,41 @@
         <button type="submit" form="form-product" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
         <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
 
-      <button type="button" id="btn-sync-erp-options" class="btn btn-warning">
-        <i class="fa fa-sliders"></i> {{ text_sync_erp_options ?? 'Sync ERP Options Only' }}
-      </button>
+        <button type="button" id="btn-sync-erp-options" class="btn btn-warning">
+          <i class="fa fa-sliders"></i> {{ text_sync_erp_options ?? 'Sync ERP Options Only' }}
+        </button>
+
+        <script>
+          (function(){
+            var btn = document.getElementById('btn-sync-erp-options');
+            if (!btn) return;
+
+            btn.addEventListener('click', function(){
+              btn.disabled = true;
+
+              var url = 'index.php?route=extension/module/product_import_manager/syncOptionsOnly'
+                      + '&product_id={{ product_id }}'
+                      + '&user_token={{ user_token|default(token) }}';
+
+              fetch(url, { headers: { 'Accept':'application/json' }})
+                      .then(r => r.json())
+                      .then(json => {
+                        if (json.error) {
+                          alert('ERP options sync error: ' + json.error);
+                        } else {
+                          alert('Options replaced. PO: ' + (json.counts?.product_option || 0)
+                                  + ', POV: ' + (json.counts?.product_option_value || 0));
+                          location.reload();
+                        }
+                      })
+                      .catch(err => alert('Request failed: ' + err))
+                      .finally(() => btn.disabled = false);
+            });
+          })();
+        </script>
       </div>
-      <script>
-        (function(){
-          var btn = document.getElementById('btn-sync-erp-options');
-          if (!btn) return;
 
-          btn.addEventListener('click', function(){
-            btn.disabled = true;
-
-            var url = 'index.php?route=extension/module/product_import_manager/syncOptionsOnly'
-                    + '&product_id={{ product_id }}'
-                    + '&user_token={{ user_token|default(token) }}';
-
-            fetch(url, { headers: { 'Accept':'application/json' }})
-                    .then(r => r.json())
-                    .then(json => {
-                      if (json.error) {
-                        alert('ERP options sync error: ' + json.error);
-                      } else {
-                        alert('Options replaced. Inserted PO: ' + json.counts.product_option + ', POV: ' + json.counts.product_option_value);
-                        location.reload();
-                      }
-                    })
-                    .catch(err => alert('Request failed: ' + err))
-                    .finally(() => btn.disabled = false);
-          });
-        })();
-      </script>
-
-
-      <h1>{{ heading_title }}</h1>
+        <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
         {% for breadcrumb in breadcrumbs %}
           <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>

@@ -1,74 +1,80 @@
 <?php
 
 
-namespace Agmedia\Models\Option;
+namespace Agmedia\Models\Product;
 
 
 use Agmedia\Helpers\Log;
+use Agmedia\Models\Config;
+use Agmedia\Models\Option\OptionValue;
+use Agmedia\Models\Option\OptionValueDescription;
+use Illuminate\Database\Capsule\Manager;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 
-class Option extends Model
+class ProductOption extends Model
 {
-    
+
     /**
      * @var bool
      */
     public $timestamps = false;
-    
+
     /**
      * @var string
      */
-    protected $table = 'option';
-    
+    protected $table = 'product_option_value';
+
     /**
      * @var string
      */
-    protected $primaryKey = 'option_id';
-    
+    protected $primaryKey = 'product_option_value_id';
+
     /**
      * @var array
      */
     protected $guarded = [
-        'option_id'
+        'product_option_value_id'
     ];
-    
-    
+
+
     /**
-     * @param $options
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function value()
+    {
+        return $this->hasOne(OptionValueDescription::class, 'option_value_id', 'option_value_id')->where('language_id', Config::getLanguage());
+    }
+
+
+    /**
+     * @param $product_options
      *
      * @return mixed
      */
-    public function make($options)
+    public static function updateStockAndPrices($product_options, $has_default_qty)
     {
-        $new_options = $options->map(function ($item) {
-            $option = OptionValueDescription::where('name', ltrim($item['IDVELICINA'], '0'))->first();
-            
-            if (isset($option['option_value_id'])) {
-                $item['option_id'] = $option['option_value_id'];
-    
-                return $item;
+        $temp_options  = '';
+        $product_price = $product_options->min(agconf('erp.price_tag'));
+
+        foreach ($product_options as $option) {
+            $price_prefix = '';
+            $price        = '';
+
+            if ($product_options->min(agconf('erp.price_tag')) < $option[agconf('erp.price_tag')]) {
+                $price_prefix = '+';
+                $price        = $option[agconf('erp.price_tag')] - $product_options->min(agconf('erp.price_tag'));
             }
-            
-            $option_value = OptionValue::insertGetId([
-                'option_id' => agconf('erp.size_option_id'),
-                'image' => 13,
-                'sort_order' => 0,
-            ]);
-            
-            for ($i = 1; $i < 4; $i++) {
-                OptionValueDescription::insert([
-                    'option_value_id' => $option_value,
-                    'language_id' => $i,
-                    'option_id' => agconf('erp.size_option_id'),
-                    'name' => ltrim($item['IDVELICINA'], '0'),
-                ]);
+
+            if ( ! $price) {
+                $price = 0;
             }
-            
-            $item['option_id'] = $option_value;
-            
-            return $item;
-        });
-        
-        return $new_options;
+
+            $temp_options .= '("' . $option['IDROBA'] . '", ' . ($has_default_qty ? $has_default_qty : $option['ZALIHAK']) . ', "' . $price_prefix . '", ' . $price . '),';
+        }
+
+        return $temp_options;
     }
 }
