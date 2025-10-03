@@ -46,7 +46,7 @@ if(!function_exists('hash_equals')) {
 if(!function_exists('agconf')) {
     function agconf($key, $default = null)
     {
-        $config_target = 'AG_CONFIG';
+        $config_target = AG_CONFIG;
     
         \Agmedia\Helpers\Log::write('array_keys($config_target)', 'keys');
         \Agmedia\Helpers\Log::write(array_keys($config_target), 'keys');
