@@ -148,6 +148,7 @@ class ControllerExtensionModuleProductImportManager extends Controller
                     'weight_prefix'   => '+',
                     'subtract'        => 1,
                     'sort_order'      => 0,
+                    'sku'             => (string)($row['IDROBA'] ?? ''),   // ⟵ OVO JE NOVO
                 ];
             }
 

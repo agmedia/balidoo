@@ -57,7 +57,9 @@ class ModelExtensionModuleProductImportManager extends Model
                                   points            = " . (int)$points . ",
                                   points_prefix     = '" . $points_prefix . "',
                                   weight            = '" . $weight . "',
-                                  weight_prefix     = '" . $weight_prefix . "'");
+                                   weight_prefix     = '" . $weight_prefix . "',
+                                 sku               = '" . $sku . "'");
+
             $inserted_pov++;
         }
 
