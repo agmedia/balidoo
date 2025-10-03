@@ -10,7 +10,7 @@ use Agmedia\Helpers\Log;
 
 class ControllerExtensionModuleProductImportManager extends Controller
 {
-    /* ====== tvoje postojeće metode ostaju (getProducts, importProducts, storeImages) ====== */
+    /* ====== tvoje postojeće metode: getProducts, importProducts, storeImages ====== */
 
     public function getProducts()
     {
@@ -87,7 +87,7 @@ class ControllerExtensionModuleProductImportManager extends Controller
         return $response;
     }
 
-    /* ====== NOVO: Single sync s aktivacijom ako qty > 0 ====== */
+    /* ====== SINGLE SYNC: s preskokom praznog IDVELICINA + aktivacija statusa ====== */
 
     public function syncOptionsOnly()
     {
@@ -115,11 +115,16 @@ class ControllerExtensionModuleProductImportManager extends Controller
                 return $this->json(['error' => 'ERP returned empty dataset for model ' . $model]);
             }
 
-            // 2) Build items
+            // 2) Build items (SKIP kad je IDVELICINA prazno)
             $minPrice = $api->min('CIJENA_MPC') ?? 0;
             $items = [];
             foreach ($api as $row) {
-                $name = self::extractSizeLabel((array)$row);
+                $row = (array)$row;
+                if (empty($row['IDVELICINA'])) {
+                    continue; // SKIP prazne veličine
+                }
+
+                $name = self::extractSizeLabel($row);
                 $items[] = [
                     'name'         => $name,
                     'quantity'     => (int)($row['ZALIHAK'] ?? 0),
@@ -131,6 +136,12 @@ class ControllerExtensionModuleProductImportManager extends Controller
                     'sort_order'   => 0,
                     'sku'          => (string)($row['IDROBA'] ?? ''),
                 ];
+            }
+
+            if (empty($items)) {
+                return $this->json([
+                    'error' => 'No valid sizes (all IDVELICINA empty) for model ' . $model
+                ]);
             }
 
             // 3) Upis opcija (samo size) + sku
@@ -157,7 +168,7 @@ class ControllerExtensionModuleProductImportManager extends Controller
         }
     }
 
-    /* ====== NOVO: ALL UPDATE (queue + step) ====== */
+    /* ====== ALL UPDATE: queue + step (artikl-po-artikl) ====== */
 
     public function bulkSyncQueue()
     {
@@ -166,7 +177,7 @@ class ControllerExtensionModuleProductImportManager extends Controller
             return $this->json(['error' => 'Missing token']);
         }
 
-        // Po potrebi prilagodi WHERE (npr. samo status=1, samo određene kategorije itd.)
+        // Po potrebi prilagodi WHERE (npr. samo određene kategorije / brandove, itd.)
         $rows = $this->db->query("
             SELECT product_id 
             FROM " . DB_PREFIX . "product 
@@ -214,11 +225,16 @@ class ControllerExtensionModuleProductImportManager extends Controller
                 ]);
             }
 
-            // 2) Build items
+            // 2) Build items (SKIP kad je IDVELICINA prazno)
             $minPrice = $api->min('CIJENA_MPC') ?? 0;
             $items = [];
             foreach ($api as $row) {
-                $name = self::extractSizeLabel((array)$row);
+                $row = (array)$row;
+                if (empty($row['IDVELICINA'])) {
+                    continue;
+                }
+
+                $name = self::extractSizeLabel($row);
                 $items[] = [
                     'name'         => $name,
                     'quantity'     => (int)($row['ZALIHAK'] ?? 0),
@@ -230,6 +246,16 @@ class ControllerExtensionModuleProductImportManager extends Controller
                     'sort_order'   => 0,
                     'sku'          => (string)($row['IDROBA'] ?? ''),
                 ];
+            }
+
+            if (empty($items)) {
+                return $this->json([
+                    'ok'         => true,
+                    'product_id' => $product_id,
+                    'model'      => $model,
+                    'updated'    => false,
+                    'reason'     => 'no-valid-sizes'
+                ]);
             }
 
             // 3) Upis opcija + sku
@@ -267,14 +293,20 @@ class ControllerExtensionModuleProductImportManager extends Controller
 
     private static function extractSizeLabel(array $row): string
     {
+        // Preferiraj IDVELICINA ako postoji
+        if (!empty($row['IDVELICINA'])) {
+            return trim($row['IDVELICINA']);
+        }
+
         $label = '';
         if (!empty($row['NAZIV'])) {
             if (preg_match('/VEL\.\s*([0-9A-Za-z]+)/u', $row['NAZIV'], $m)) {
                 $label = trim($m[1]);
             }
         }
-        if (!$label && !empty($row['IDVELICINA'])) $label = trim($row['IDVELICINA']);
-        if (!$label && !empty($row['IDROBA']))      $label = trim($row['IDROBA']);
+        if (!$label && !empty($row['IDROBA'])) {
+            $label = trim($row['IDROBA']);
+        }
         return $label ?: 'N/A';
     }
 
