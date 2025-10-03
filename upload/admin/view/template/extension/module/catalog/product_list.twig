@@ -517,6 +517,13 @@
 	<div class="container-fluid bull5i-content bull5i-container{{ not module_product_quick_edit_search_bar ? ' hide' }}" id="search-bar">
 		<div class="row navbar-bull5i">
 			<div class="pull-right">
+
+				<button type="button" id="btn-bulk-erp-sync" class="btn btn-warning">
+					<i class="fa fa-refresh"></i> Sync ERP Options (All)
+				</button>
+				<div id="bulk-erp-sync-status" style="margin-top:8px;font-size:13px;"></div>
+
+
 				<div class="nav navbar-nav navbar-checkbox hidden" id="batch-edit-container">
 					<div class="checkbox">
 						<label>
@@ -919,5 +926,68 @@ $("body").on("keydown","#otherSettingsModal",function(e){if(e.altKey&&e.shiftKey
     }
   })
 </script>
+
+<script>
+	(function(){
+		const btn = document.getElementById('btn-bulk-erp-sync');
+		const box = document.getElementById('bulk-erp-sync-status');
+		if (!btn || !box) return;
+
+		function setStatus(html) { box.innerHTML = html; }
+
+		btn.addEventListener('click', async () => {
+			btn.disabled = true;
+			setStatus('Pripremam listu proizvoda…');
+
+			const token = '{{ user_token|default(token) }}';
+
+			try {
+				// 1) QUEUE
+				const qres = await fetch('index.php?route=extension/module/product_import_manager/bulkSyncQueue&user_token=' + token, {headers:{'Accept':'application/json'}});
+				const q = await qres.json();
+				if (!q.ok || !Array.isArray(q.ids) || q.ids.length === 0) {
+					setStatus('Nema proizvoda za obradu.');
+					btn.disabled = false;
+					return;
+				}
+
+				const ids = q.ids;
+				let done=0, updated=0, skipped=0, errors=0, activated=0;
+
+				// 2) STEP BY STEP
+				for (const pid of ids) {
+					setStatus(`Obrađujem ${done+1}/${ids.length} (product_id: ${pid})…`);
+					try {
+						const sres = await fetch('index.php?route=extension/module/product_import_manager/bulkSyncStep&user_token=' + token + '&product_id=' + pid, {headers:{'Accept':'application/json'}});
+						const s = await sres.json();
+						if (s && s.ok && s.updated) {
+							updated++;
+							if (s.activated) activated++;
+						} else if (s && s.ok && s.updated === false) {
+							skipped++;
+						} else {
+							errors++;
+						}
+					} catch (e) {
+						errors++;
+					}
+					done++;
+
+					// (opcionalno) mala pauza da ne “udari” ERP
+					await new Promise(r => setTimeout(r, 150));
+				}
+
+				setStatus(`Gotovo. Ažurirano: ${updated}, Aktivirano: ${activated}, Preskočeno: ${skipped}, Grešaka: ${errors}`);
+				alert('Sync završio. Ažurirano: ' + updated + ', Aktivirano: ' + activated + ', Preskočeno: ' + skipped + ', Grešaka: ' + errors);
+				btn.disabled = false;
+
+			} catch (e) {
+				setStatus('Greška pri pripremi queue-a: ' + e);
+				btn.disabled = false;
+			}
+		});
+	})();
+</script>
+
 
 {{ footer }}
