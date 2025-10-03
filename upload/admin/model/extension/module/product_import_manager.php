@@ -43,6 +43,9 @@ class ModelExtensionModuleProductImportManager extends Model
             $weight_prefix= $this->db->escape($row['weight_prefix'] ?? '+');
             $sort_order   = (int)($row['sort_order'] ?? $i);
 
+            // DODAJ OVO:
+            $sku          = $this->db->escape($row['sku'] ?? ''); // <-- NOVO
+
             $option_value_id = $this->getOrCreateOptionValue($option_id, $name, $language_id, $sort_order);
 
             $this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value
