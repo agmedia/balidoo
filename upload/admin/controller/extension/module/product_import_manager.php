@@ -340,13 +340,14 @@ class ControllerExtensionModuleProductImportManager extends Controller
     {
         // Preferiraj IDVELICINA ako postoji
         if (!empty($row['IDVELICINA'])) {
-            return trim($row['IDVELICINA']);
+            return ltrim($row['IDVELICINA'], '0'); // makni sve leading nule
         }
 
         $label = '';
         if (!empty($row['NAZIV'])) {
             if (preg_match('/VEL\.\s*([0-9A-Za-z]+)/u', $row['NAZIV'], $m)) {
                 $label = trim($m[1]);
+                $label = ltrim($label, '0'); // isto očisti
             }
         }
         if (!$label && !empty($row['IDROBA'])) {
