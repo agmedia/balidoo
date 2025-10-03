@@ -10,7 +10,7 @@ use Agmedia\Helpers\Log;
 
 class ControllerExtensionModuleProductImportManager extends Controller
 {
-    /* ====== tvoje postojeće metode: getProducts, importProducts, storeImages ====== */
+    /* ====== postojeće metode: getProducts, importProducts, storeImages ====== */
 
     public function getProducts()
     {
@@ -87,7 +87,7 @@ class ControllerExtensionModuleProductImportManager extends Controller
         return $response;
     }
 
-    /* ====== SINGLE SYNC: s preskokom praznog IDVELICINA + aktivacija statusa ====== */
+    /* ====== SINGLE SYNC: skip praznog IDVELICINA + brisanje postojeće opcije + aktivacija statusa ====== */
 
     public function syncOptionsOnly()
     {
@@ -139,8 +139,32 @@ class ControllerExtensionModuleProductImportManager extends Controller
             }
 
             if (empty($items)) {
+                // NEMA valjanih veličina → obriši postojeću “Veličina” opciju s artikla
+                $this->load->model('extension/module/product_import_manager');
+                if (method_exists($this->model_extension_module_product_import_manager, 'removeSizeOptionForProduct')) {
+                    $this->model_extension_module_product_import_manager->removeSizeOptionForProduct($product_id);
+                } else {
+                    // fallback brisanja ako helper nije dostupan:
+                    $this->removeSizeOptionFallback($product_id);
+                }
+
+                // Aktiviraj artikl ako ERP ukupna količina > 0
+                $totalQtyFromErp = 0;
+                foreach ($api as $r) {
+                    $r = (array)$r;
+                    $totalQtyFromErp += (int)($r['ZALIHAK'] ?? 0);
+                }
+                if ($totalQtyFromErp > 0) {
+                    $this->db->query("UPDATE " . DB_PREFIX . "product SET status = 1 WHERE product_id = " . (int)$product_id);
+                }
+
                 return $this->json([
-                    'error' => 'No valid sizes (all IDVELICINA empty) for model ' . $model
+                    'success'     => true,
+                    'message'     => 'No valid sizes; removed Size option for model ' . $model,
+                    'updated'     => false,
+                    'removed'     => true,
+                    'activated'   => $totalQtyFromErp > 0 ? 1 : 0,
+                    'total_qty'   => $totalQtyFromErp
                 ]);
             }
 
@@ -249,12 +273,33 @@ class ControllerExtensionModuleProductImportManager extends Controller
             }
 
             if (empty($items)) {
+                // NEMA valjanih veličina → obriši postojeću “Veličina” opciju s artikla
+                $this->load->model('extension/module/product_import_manager');
+                if (method_exists($this->model_extension_module_product_import_manager, 'removeSizeOptionForProduct')) {
+                    $this->model_extension_module_product_import_manager->removeSizeOptionForProduct($product_id);
+                } else {
+                    $this->removeSizeOptionFallback($product_id);
+                }
+
+                // Aktiviraj artikl ako ERP ukupna količina > 0
+                $totalQtyFromErp = 0;
+                foreach ($api as $r) {
+                    $r = (array)$r;
+                    $totalQtyFromErp += (int)($r['ZALIHAK'] ?? 0);
+                }
+                if ($totalQtyFromErp > 0) {
+                    $this->db->query("UPDATE " . DB_PREFIX . "product SET status = 1 WHERE product_id = " . (int)$product_id);
+                }
+
                 return $this->json([
                     'ok'         => true,
                     'product_id' => $product_id,
                     'model'      => $model,
                     'updated'    => false,
-                    'reason'     => 'no-valid-sizes'
+                    'removed'    => true,
+                    'reason'     => 'no-valid-sizes',
+                    'activated'  => $totalQtyFromErp > 0 ? 1 : 0,
+                    'total_qty'  => $totalQtyFromErp
                 ]);
             }
 
@@ -315,5 +360,44 @@ class ControllerExtensionModuleProductImportManager extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($payload));
         return;
+    }
+
+    /**
+     * Fallback brisanja opcije “Veličina” s artikla ako model helper nije dostupan.
+     * (koristi isti SQL kao u modelu: deleteOneProductOption)
+     */
+    private function removeSizeOptionFallback(int $product_id): void
+    {
+        // pokuša uzeti option_id iz configa ili po imenu
+        $option_id = (int)(agconf('erp.size_option_id') ?? 0);
+
+        if (!$option_id) {
+            // potraži po imenu u bilo kojem jeziku
+            $names = ['Veličina','Velicina','Size'];
+            $names_esc = array_map(function($n){ return "'" . $this->db->escape($n) . "'"; }, $names);
+            $q = $this->db->query("SELECT o.option_id
+                                     FROM " . DB_PREFIX . "option o
+                                     JOIN " . DB_PREFIX . "option_description od
+                                       ON od.option_id = o.option_id
+                                    WHERE od.name IN (" . implode(',', $names_esc) . ")
+                                      AND o.type = 'select'
+                                    LIMIT 1");
+            if ($q->num_rows) {
+                $option_id = (int)$q->row['option_id'];
+            }
+        }
+
+        if (!$option_id) return;
+
+        // pobriši vrijednosti pa product_option
+        $this->db->query("DELETE pov FROM " . DB_PREFIX . "product_option_value pov
+                          JOIN " . DB_PREFIX . "product_option po 
+                            ON po.product_option_id = pov.product_option_id
+                         WHERE po.product_id = " . (int)$product_id . "
+                           AND po.option_id  = " . (int)$option_id);
+
+        $this->db->query("DELETE FROM " . DB_PREFIX . "product_option 
+                          WHERE product_id = " . (int)$product_id . "
+                            AND option_id  = " . (int)$option_id);
     }
 }

@@ -137,6 +137,22 @@ class ModelExtensionModuleProductImportManager extends Model
         return $option_value_id;
     }
 
+    public function removeSizeOptionForProduct(int $product_id): void
+    {
+        // koristi postojeći option_id iz konfiguracije
+        $option_id = (int)(agconf('erp.size_option_id') ?? 0);
+        if (!$option_id) {
+            $option_id = $this->findOptionIdByNameAnyLang(['Veličina','Velicina','Size']);
+            if (!$option_id) {
+                // ako nema ni po imenu, nema što brisati
+                return;
+            }
+        }
+        // pobriši SAMO tu opciju s artikla
+        $this->deleteOneProductOption($product_id, $option_id);
+    }
+
+
     private function povHasSkuColumn(): bool
     {
         static $has = null;
