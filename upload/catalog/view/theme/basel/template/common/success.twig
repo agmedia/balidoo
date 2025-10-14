@@ -9,6 +9,14 @@
   });
 </script>
 
+<script>
+  gtag('event', 'purchase', {
+    "transaction_id": "{{ order_id }}",
+    "value": "{{ total }}",
+    "currency": "EUR"
+  });
+</script>
+
 <!-- End Glami piXel -->
 <div class="container">
   <ul class="breadcrumb">
