@@ -1,17 +1,14 @@
 {{ header }}
 
-<!-- Glami piXel for KOZO.hr -->
+
+
 <script>
-(function(f, a, s, h, i, o, n) {f['GlamiTrackerObject'] = i; f[i]=f[i]||function(){(f[i].q=f[i].q||[]).push(arguments)};o=a.createElement(s), n=a.getElementsByTagName(s)[0];o.async=1;o.src=h;n.parentNode.insertBefore(o,n) })(window, document, 'script', '//www.glami.hr/js/compiled/pt.js', 'glami');
-glami('create', '78FEF97D04F20D6F870D45C4534F59BF', 'hr');
-glami('track', 'PageView');
-glami('track', 'Purchase', {
-item_ids: [{% for prod in order_products %}'{{ prod.model }}{% if prod.value %}.{{ prod.value }}{% endif %}',{% endfor %}], // bought product IDs. Use the same IDs as you use in the feed 
-value: {{ total }}, // order value (sum of product values)
-currency: 'HRK', // order value currency
-transaction_id: '{{ order_id }}' // order ID
-});
+  fbq('track', 'Purchase', {
+    value: '{{ total }}',
+    currency: 'EUR'
+  });
 </script>
+
 <!-- End Glami piXel -->
 <div class="container">
   <ul class="breadcrumb">
